@@ -6,9 +6,6 @@ using System.Net;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-//using OpenQA.Selenium;
-//using OpenQA.Selenium.Chrome;
-//using OpenQA.Selenium.Support.UI;
 
 namespace com.charlie.ebook.web.article
 {
@@ -104,7 +101,7 @@ namespace com.charlie.ebook.web.article
             int nIndex = 1;
             SubArticles.Clear();
             string sTable = "";
-            sTable += "<table>\r\n";
+            sTable += "<table class=\"articleTable\">\r\n";
             foreach (string s in sUrls)
             {
                 System.Threading.Tasks.Task.Delay(10000);
@@ -273,7 +270,7 @@ namespace com.charlie.ebook.web.article
                             string sImageDesc = sImageDescSource.Length == 2 ? xImageDescNodes[i].Attributes[sImageDescSource[1]].Value : xImageDescNodes[i].InnerHtml;
 
                             string sImageFileName = DownloadImage(sImageUrl, sImageIndex);
-                            sTable += "<table><tr><td><img src=\"../images/" + sImageFileName + "\" /></td></tr>" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
+                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sImageFileName + "\" /></td></tr>" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
                         }
                     }
                 }
@@ -315,7 +312,7 @@ namespace com.charlie.ebook.web.article
 
                                 if (sReturnedFileName != "")
                                 {
-                                    sTable += "<table><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
+                                    sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
                                     nImageIndex++;
                                     bImageDetected = true;
                                 }
@@ -337,7 +334,7 @@ namespace com.charlie.ebook.web.article
 
                         if (sReturnedFileName != "")
                         {
-                            sTable += "<table><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
+                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
                             nImageIndex++;
                             bImageDetected = true;
                         }
@@ -364,8 +361,8 @@ namespace com.charlie.ebook.web.article
             sXhtmlContents += "  <title>" + Title + "</title>\r\n";
             sXhtmlContents += "</head>\r\n";
             sXhtmlContents += "<body>\r\n";
-            sXhtmlContents += "<h3>" + Title + "</h3>\r\n";
-            sXhtmlContents += "<p>" + PubDate + "</p>\r\n";
+            sXhtmlContents += "<table class=\"articleTitle\"><tr><td>" + Title + "</td></tr>\r\n";
+            sXhtmlContents += "<tr><td>" + PubDate + "</td></tr></table>\r\n";
             sXhtmlContents += Summary == ""? "<p>" + Summary + "</p>\r\n" : "";
             sXhtmlContents += Content + "\r\n";
             sXhtmlContents += Author == ""? "<p>" + Author + "</p>\r\n" : "";

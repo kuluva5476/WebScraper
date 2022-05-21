@@ -9,7 +9,6 @@
       "WebScraper/1.0.0": {
         "dependencies": {
           "HtmlAgilityPack": "1.11.42",
-          "Ionic.Zip": "1.9.1.8",
           "Selenium.WebDriver": "3.141.0"
         },
         "runtime": {
@@ -21,14 +20,6 @@
           "lib/netstandard2.0/HtmlAgilityPack.dll": {
             "assemblyVersion": "1.11.42.0",
             "fileVersion": "1.11.42.0"
-          }
-        }
-      },
-      "Ionic.Zip/1.9.1.8": {
-        "runtime": {
-          "lib/Ionic.Zip.dll": {
-            "assemblyVersion": "1.9.1.8",
-            "fileVersion": "1.9.1.8"
           }
         }
       },
@@ -858,13 +849,6 @@
       "sha512": "sha512-LDc1bEfF14EY2DZzak4xvzWvbpNXK3vi1u0KQbBpLUN4+cx/VrvXhgCAMSJhSU5vz0oMfW9JZIR20vj/PkDHPA==",
       "path": "htmlagilitypack/1.11.42",
       "hashPath": "htmlagilitypack.1.11.42.nupkg.sha512"
-    },
-    "Ionic.Zip/1.9.1.8": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-E77NU0+mXFsiJG/CikkINVD/2ugIgjqRZf41pixpAArRzOUrn/2gCL4G2PBREvRVOy+wU8ZbG/UBLcH4Tkw1gg==",
-      "path": "ionic.zip/1.9.1.8",
-      "hashPath": "ionic.zip.1.9.1.8.nupkg.sha512"
     },
     "Microsoft.CSharp/4.3.0": {
       "type": "package",

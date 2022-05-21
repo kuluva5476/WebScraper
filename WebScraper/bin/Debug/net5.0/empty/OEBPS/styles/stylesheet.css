@@ -16,13 +16,19 @@ html {
 }
 p {
   text-align: left;
-  text-indent: 0em;
+  text-indent: 2em;
   margin: 0;
-  Padding-top: 0;
-  Padding-bottom: 1em;
+  Padding-top: 1em;
+  Padding-bottom: 0.5em;
   Padding-left: 0;
   Padding-right: 0;
 }
+
+p.pubTime
+{
+	font-size: 9pt;
+}
+
 div {
   text-align: left;
   text-indent: 0em;
@@ -36,10 +42,6 @@ div {
   Padding-right: 0;
 }
 
-table
-{
-	margin: 1em;
-}
 a:link
 {
 	color: #202020;
@@ -198,6 +200,7 @@ a:visited
 	font-size: 12pt;
 }
 
+
 .articleIndex
 {
 	width: 100%;
@@ -207,26 +210,87 @@ a:visited
 	text-align: center;
 }
 
-
 .articleImage
 {
 	width: 100%;
-	border: #444444 1px solid;
+	border: #444444 0px solid;
 	background: #eeeeee;
 	font-size: 9pt;
-	
 }
 
 
+
+img
+{
+	width: 100%;
+	border: #444444 0px solid;
+	background: #eeeeee;
+	font-size: 9pt;
+}
+
+.articleTitle
+{
+	margin: 0;
+	width: 100%;
+	border-collapse: collapse;
+	border: #444444 1px solid;
+}
+
+.articleTitle tr td
+{
+	margin: 0;
+	width: 100%;
+	border-collapse: collapse;
+	border: #444444 1px solid;
+	padding-left: 1em;
+	font-size: 15pt;
+}
+
+.articleTitle tr:nth-child(2) td
+{
+	font-size: 9pt;
+	color: #333333;
+	background: #eeeeee;
+	padding-left: 3em;
+}
+
+.imageTable
+{
+	width: 100%;
+	border-collapse: collapse;
+	border: #444444 1px solid;
+}
+.imageTable td
+{
+	padding: 5px;
+}
+
+.imageTable tr
+{
+	background: #ffffff;
+	font-size: 12pt;
+}
+
+.imageTable tr:nth-child(even) 
+{
+	background: #e0e0e0;
+	color: #101010
+	font-size: 10pt;
+	margin: 5px;
+	padding: 5px;
+	padding-left: 10pt;
+	border-top: #444444 1px solid;
+}
 
 .articleTable
 {
 	width: 100%;
 	border-collapse: collapse;
+	border: #444444 0px solid;
 }
 .articleTable td
 {
-	padding: 10px;
+	padding: 5px;
 }
 
 .articleTable tr
@@ -237,7 +301,7 @@ a:visited
 
 .articleTable tr:nth-child(even)
 {
-	background: #e0e0e0;
+	background: #d7efff;
 	color: #101010
 	font-size: 14pt;
 	padding: 10px;

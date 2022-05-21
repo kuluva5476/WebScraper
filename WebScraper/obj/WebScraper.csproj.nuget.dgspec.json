@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "E:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj": {}
+    "D:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj": {}
   },
   "projects": {
-    "E:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj": {
+    "D:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj",
+        "projectUniqueName": "D:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj",
         "projectName": "WebScraper",
-        "projectPath": "E:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj",
-        "packagesPath": "C:\\Users\\TeraMed\\.nuget\\packages\\",
-        "outputPath": "E:\\repo\\WebScraper\\WebScraper\\obj\\",
+        "projectPath": "D:\\repo\\WebScraper\\WebScraper\\WebScraper.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "D:\\repo\\WebScraper\\WebScraper\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\TeraMed\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -43,10 +47,6 @@
             "HtmlAgilityPack": {
               "target": "Package",
               "version": "[1.11.42, )"
-            },
-            "Ionic.Zip": {
-              "target": "Package",
-              "version": "[1.9.1.8, )"
             },
             "Selenium.WebDriver": {
               "target": "Package",

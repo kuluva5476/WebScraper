@@ -98,6 +98,7 @@ namespace com.charlie.ebook
             sManifest += "\t\t<item href=\"toc.ncx\" id=\"ncx\" media-type=\"application/x-dtbncx+xml\"/>\r\n";
             sManifest += "\t\t<item href=\"styles/stylesheet.css\" id=\"main-css\" media-type=\"text/css\"/>\r\n";
             sManifest += "\t\t<item href=\"images/cover.jpg\" id=\"cover-image\" media-type=\"image/jpeg\"/>\r\n";
+            sManifest += "\t\t<item href=\"text/coverpage.xhtml\" id=\"coverpage.xhtml\" media-type=\"application/xhtml+xml\"/>\r\n";
             foreach (Article oArticle in ArticleList)
             {
                 sManifest += Manifest(oArticle);
