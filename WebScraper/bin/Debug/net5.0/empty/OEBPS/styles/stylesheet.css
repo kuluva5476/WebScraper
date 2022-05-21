@@ -1,0 +1,244 @@
+body {
+  text-align: left;
+  text-indent: 0em;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 1em;
+  margin-right: 1em;
+  Padding-top: 0;
+  Padding-bottom: 0;
+  Padding-left: 0;
+  Padding-right: 0;
+}
+html {
+  /* writing-mode: tb-rl; */
+  /* direction: rtl; */
+}
+p {
+  text-align: left;
+  text-indent: 0em;
+  margin: 0;
+  Padding-top: 0;
+  Padding-bottom: 1em;
+  Padding-left: 0;
+  Padding-right: 0;
+}
+div {
+  text-align: left;
+  text-indent: 0em;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  Padding-top: 0;
+  Padding-bottom: 0;
+  Padding-left: 0;
+  Padding-right: 0;
+}
+
+table
+{
+	margin: 1em;
+}
+a:link
+{
+	color: #202020;
+	text-decoration: none;
+}
+
+a:visited
+{
+	color: #505050;
+	text-decoration: none;
+}
+
+.weatherFrame
+{
+	width: 600px;
+	padding:10px 10px 10px 10px; border:#333333 0px solid;
+	border-collapse: collapse;
+}
+
+.weatherTitle
+{
+	font-size: 18pt;
+}
+
+.temperatureNum
+{
+	font-size: 30pt;
+}
+
+.temperatureSign
+{
+	font-size: 18pt;
+}
+
+.weatherTable3
+{
+	width: 100%;
+	padding:20px 5px 0px 5px; border:#333333 0px solid;
+	border-collapse: collapse;
+}
+
+.weatherTable3 td
+{
+	font-size: 24pt;
+	background: #555555;
+	color: #eeeeee;
+}
+
+.weatherTable
+{
+	width: 100%;
+	padding:20px 5px 20px 5px; border:#333333 0px solid;
+	vertical-align: text-top;
+}
+
+.weatherTable td
+{
+	padding:10px; border:#333333 0px solid;
+	color: #555555;
+}
+
+.weatherTable2
+{
+	width: 100%;
+	padding:5px 5px 5px 5px; 
+	border:#333333 0px solid;
+	border-spacing: 0px;
+	vertical-align: text-top;
+}
+
+.weatherTable2 td
+{
+	padding:5px; 
+	font-size: 14pt;
+	border:#333333 0px solid;
+	color: #555555;
+	font-size: 14pt;
+	background: #eeeeee;
+	text-align: center;
+}
+
+.weatherTable2 td:nth-child(odd)
+{
+	padding:5px; 
+	font-size: 14pt;
+	border:#333333 0px solid;
+	color: #555555;
+	font-size: 14pt;
+	background: #eeeeee;
+	text-align: center;
+}
+
+.weatherTable2 td:nth-child(even)
+{
+	padding:5px; 
+	font-size: 14pt;
+	border:#333333 0px solid;
+	border-left: #333333 0px solid;
+	background: #ffffff;
+	color: #555555;
+}
+
+.indexItem
+{
+	width: 100%;
+	padding: 15px;
+	border: #444444 1px solid;	
+	text-indent: 30px;
+	font-size: 12pt;
+}
+
+.indexItem div:nth-child(odd)
+{
+	padding: 15px;
+	padding-left: 40px;
+	border: #444444 1px solid;	
+	border-top: 0px;
+	background: #ffffff;
+	font-size: 12pt;
+}
+
+.indexItem div:nth-child(even)
+{
+	padding: 15px;
+	padding-left: 40px;
+	border: #444444 1px solid;	
+	border-top: 0px;
+	background: #eeeeee;
+	font-size: 12pt;
+}
+
+.indexItem div:nth-child(1)
+{
+	background: #555555;
+	color: #eeeeee;
+	font-size: 14pt;
+	text-indent: 0px;
+	padding: 20px;
+}
+	
+	
+.articleTitle
+{
+	width: 100%;
+	background: #555555;
+	padding: 15px;
+	font-size: 14pt;
+	color: #eeeeee;
+}
+
+.articleContent
+{
+	width: 100%;
+	padding: 10px;
+	background: #ffffff;
+	font-size: 12pt;
+}
+
+.articleIndex
+{
+	width: 100%;
+	padding: 10px;
+	background: #eeeeee;
+	font-size: 12pt;
+	text-align: center;
+}
+
+
+.articleImage
+{
+	width: 100%;
+	border: #444444 1px solid;
+	background: #eeeeee;
+	font-size: 9pt;
+	
+}
+
+
+
+.articleTable
+{
+	width: 100%;
+	border-collapse: collapse;
+}
+.articleTable td
+{
+	padding: 10px;
+}
+
+.articleTable tr
+{
+	background: #ffffff;
+	font-size: 12pt;
+}
+
+.articleTable tr:nth-child(even)
+{
+	background: #e0e0e0;
+	color: #101010
+	font-size: 14pt;
+	padding: 10px;
+}
