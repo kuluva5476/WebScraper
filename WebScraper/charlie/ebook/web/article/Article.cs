@@ -3,14 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net;
-using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace com.charlie.ebook.web.article
 {
     class Article
     {
+        private string _AppDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
+        private int _Max = 30;
+
         private int ArticleNo { get; set; }
         public string ArticleUrl { get; private set; }
         public string MapName { get; private set; }
@@ -20,12 +23,14 @@ namespace com.charlie.ebook.web.article
         public string ModDate { get; private set; }
         public string Summary { get; private set; }
         public string Content { get; private set; }
-        public string MediaType { get; set; }
-
         public string Filename { get; private set; }
 
-        public List<Article> SubArticles = new List<Article>();
+        private bool _Index = false;
 
+        private string _Source = "";
+
+
+        public List<Article> SubArticles = new List<Article>();
 
         public string ArticleId { get; set; }
 
@@ -34,7 +39,7 @@ namespace com.charlie.ebook.web.article
         private HtmlDocument _Html = new HtmlDocument();
 
         /// <summary>
-        /// Empty class
+        /// Index
         /// </summary>
         /// <param name="_MapName">Mapper</param>
         /// <param name="_ArticleNum">ID</param>
@@ -47,6 +52,7 @@ namespace com.charlie.ebook.web.article
             PubDate = System.DateTime.Now.ToString("yyyy.MM.dd HH:mm");
             Filename = ArticleId + ".xhtml";
             CreateIndex();
+            _Index = true;
         }
 
         /// <summary>
@@ -54,22 +60,30 @@ namespace com.charlie.ebook.web.article
         /// </summary>
         /// <param name="_Url">URL of the article</param>
         /// <param name="_MapName">Mapper</param>
-        /// <param name="_ArticleId">ID</param>
-        public Article(string _Url, string _MapName, int _ArticleId)
+        /// <param name="_ArticleNum">ID</param>
+        public Article(string _Url, string _MapName, int _ArticleNum)
         {
-            ArticleNo = _ArticleId;
+            ArticleNo = _ArticleNum;
 
-            ArticleId = _MapName + _ArticleId.ToString("000");
+            ArticleId = _MapName + _ArticleNum.ToString("000");
             _Mapper.LoadMapper(_MapName);
             ArticleUrl = _Url;
             Filename = ArticleId + ".xhtml";
-            Parse();
+            _Source = "(" + _Mapper.Caption + ") ";
+            try
+            {
+                Parse();
+            }
+            catch (Exception ex)
+            {
+                
+            }
+            _Index = false;
         }
 
         public void LoadHtml()
         {
             _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
-            _Html.Save("Loaded.html");
         }
         private async Task<string> LoadHtmlAsync(string _Url)
         {
@@ -80,14 +94,28 @@ namespace com.charlie.ebook.web.article
             options.AddArgument("start-minimized");
             options.AddArgument("--window-position=-32000,-32000");
             options.AddArgument("--log-level=5");
-            _Driver = new ChromeDriver(options);
+            string sPageSource = "";
+            try
+            {
+                ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                service.HideCommandPromptWindow = true;
 
-            _Driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(100);
-            _Driver.Navigate().GoToUrl(_Url);
-            //WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(100));
+                _Driver = new ChromeDriver(service, options);
+                
+                _Driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(100);
+                _Driver.Navigate().GoToUrl(_Url);
+
+                WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(10));
+                wait.Until(_Driver => _Driver.FindElement(By.TagName("div")));
+
+                sPageSource = _Driver.PageSource;
+                _Driver.Quit();
+            }
+            catch (Exception ex)
+            { 
             
-            string sPageSource = _Driver.PageSource;
-            _Driver.Close();
+            }
+            
             return sPageSource;
         }
 
@@ -97,11 +125,13 @@ namespace com.charlie.ebook.web.article
             Content = "";
 
             List<string> sUrls = GetArticleUrls();
+            
+            string sCheckDate = System.DateTime.Now.ToString("yyyyMMdd");
 
             int nIndex = 1;
             SubArticles.Clear();
-            string sTable = "";
-            sTable += "<table class=\"articleTable\">\r\n";
+
+            // Do the date filter here...
             foreach (string s in sUrls)
             {
                 System.Threading.Tasks.Task.Delay(10000);
@@ -109,16 +139,33 @@ namespace com.charlie.ebook.web.article
                 try
                 {
                     Article oArticle = new Article(s, _Mapper.MapName, nIndex++);
-                    oArticle.Save();
-                    SubArticles.Add(oArticle);
+                    if (oArticle.Content == "")
+                        continue;
 
-                    sTable += "\t<tr><td><a href=\"" + oArticle.Filename + "\" >" + oArticle.Title + "</a></td></tr>\r\n";
+                    DateTime oArticleDate;
+                    DateTime.TryParse(oArticle.PubDate.Split(" ")[0].Split("星期")[0], out oArticleDate);
+                    if ((oArticleDate.ToString("yyyyMMdd") != sCheckDate) && _Mapper.CheckArticleDate)
+                        break;
+
+                    // "Stack" into SubArticle queue
+                    SubArticles.Insert(0, oArticle);
                 }
                 catch (Exception ex) 
                 { 
                 }
             }
-            sTable += "\t<tr /><td /></table>\r\n";
+
+            // Generate index in reverse order
+            string sTable = "";
+            foreach (Article oArticle in SubArticles)
+            {
+                sTable += "\t<tr><td><a href=\"" + oArticle.Filename + "\" >" + oArticle.Title + "</a></td></tr>\r\n";
+            }
+
+            if (sTable != "")
+            {
+                sTable = "<table class=\"articleTable\">\r\n" + sTable + "</table>\r\n";
+            }
 
             Content = sTable;
         }
@@ -130,32 +177,40 @@ namespace com.charlie.ebook.web.article
             HtmlDocument oHtml = new HtmlDocument();
             oHtml.LoadHtml(LoadHtmlAsync(_Mapper.IndexUrl).Result);
 
-            HtmlNodeCollection xNodeList = oHtml.DocumentNode.SelectNodes(_Mapper.IndexListXPath);
-
-            foreach (HtmlNode oNode in xNodeList)
+            HtmlNodeCollection xNodeList;
+            xNodeList = oHtml.DocumentNode.SelectNodes(_Mapper.IndexListXPath);
+            if (xNodeList != null)
             {
-                HtmlNode oArticleNode = oNode.SelectSingleNode(_Mapper.IndexItemXPath);
-                if (oArticleNode != null)
+                foreach (HtmlNode oNode in xNodeList)
                 {
-                    string sHref = oArticleNode.Attributes["href"].Value;
-                    // Make it absolute url
-                    Uri oBase = new Uri(_Mapper.IndexUrl);
-                    sHref = (new Uri(oBase, sHref)).AbsoluteUri;
-                    string sTitle = oArticleNode.InnerText;
-                    bool bContinue = false;
-
-                    // Filter unwanted...
-                    foreach (string sFilter in _Mapper.IndexItemFilter)
+                    if (ArticleItems.Count >= _Max)
+                        break;
+                    HtmlNode oArticleNode = _Mapper.IndexItemXPath == "" ? oNode : oNode.SelectSingleNode(_Mapper.IndexItemXPath);
+                    if (oArticleNode != null)
                     {
-                        if (oArticleNode.OuterHtml.Contains(sFilter))
-                        //if (sTitle.Contains(sFilter))
-                            bContinue = true;
+                        string sHref = oArticleNode.Attributes["href"].Value;
+                        // Make it absolute url
+                        Uri oBase = new Uri(_Mapper.IndexUrl);
+                        sHref = (new Uri(oBase, sHref)).AbsoluteUri;
+
+                        if (sHref == _Mapper.LastVisit)
+                            break;
+
+                        //string sTitle = oArticleNode.InnerText;
+                        bool bContinue = false;
+
+                        // Filter unwanted...
+                        foreach (string sFilter in _Mapper.IndexItemFilter)
+                        {
+                            if (oArticleNode.OuterHtml.Contains(sFilter))
+                                bContinue = true;
+                        }
+
+                        if (bContinue)
+                            continue;
+
+                        ArticleItems.Add(sHref);
                     }
-
-                    if (bContinue)
-                        continue;
-
-                    ArticleItems.Add(sHref);
                 }
             }
             return ArticleItems;
@@ -165,13 +220,16 @@ namespace com.charlie.ebook.web.article
         {
             WebClient oDownloader = new WebClient();
             // Get file extension
-            string sExtension = _Url.Substring(_Url.LastIndexOf(".")).Split("?")[0];
+            string sExtension = _Url.Substring(_Url.LastIndexOf(".")).Split("?")[0].Split("&")[0];
+
+            if (sExtension.ToLower() == ".svg")
+                return "";
 
             string sReturnFileName = "";
             string sDownloadedName = ArticleId + "_" + _ImageIndex + sExtension;
             try
             {
-                oDownloader.DownloadFile(_Url, "output\\OEBPS\\images\\" + sDownloadedName);
+                oDownloader.DownloadFile(_Url, _AppDir + "output\\OEBPS\\images\\" + sDownloadedName);
                 sReturnFileName = sDownloadedName;
             }
             catch
@@ -181,7 +239,7 @@ namespace com.charlie.ebook.web.article
         }
 
         // Recursively parse div nodes
-        private string ParseRecurse(HtmlNode _RootNode)
+        private string RecursiveParse(HtmlNode _RootNode)
         {
             string sReturn = "";
 
@@ -206,7 +264,7 @@ namespace com.charlie.ebook.web.article
                             foreach (HtmlNode oInnerNode in _RootNode.ChildNodes)
                             {
                                 if (oInnerNode.Name == "a")
-                                    sReturn += "<b>" + oInnerNode.InnerText + "</b> (<u>" + oInnerNode.Attributes["href"].Value + "</u>)";
+                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
                                 else if (oInnerNode.Name == "#text")
                                     sReturn += oInnerNode.InnerText;
                                 else
@@ -217,13 +275,18 @@ namespace com.charlie.ebook.web.article
                         else
                             foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
                             {
-                                sReturn += ParseRecurse(oChildNode);
+                                sReturn += RecursiveParse(oChildNode);
                             }
                     }
                     else
                     {
                         if (_RootNode.InnerText.Trim() != "")
                             sReturn = _RootNode.InnerText.Trim();
+                        else
+                        {
+                            if (_RootNode.Name.ToLower() == "br")
+                                sReturn = "<br />";
+                        }
                     }
                 }
             }
@@ -238,10 +301,18 @@ namespace com.charlie.ebook.web.article
         private void Parse()
         {
             LoadHtml();
-            Title = _Mapper.Title != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Title).InnerText.Trim() : "";
-            Author = _Mapper.Author != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Author).InnerText.Trim() : "";
-            PubDate = _Mapper.PubDate != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.PubDate).InnerText.Trim() : "";
-            Summary = _Mapper.Summary != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Summary).InnerText.Trim() : "";
+            Content = "";
+            Title = "";
+            try
+            {
+                Title = _Mapper.Title != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Title)?.InnerText.Trim() : "";
+                Author = _Mapper.Author != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Author)?.InnerText.Trim() : "";
+                PubDate = _Mapper.PubDate != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.PubDate)?.InnerText.Trim() : "";
+                Summary = _Mapper.Summary != "" ? _Html.DocumentNode.SelectSingleNode(_Mapper.Summary)?.InnerText.Trim() : "";
+            }
+            catch { }
+            if (Title == "" || Title == null)
+                return;
 
             HtmlNode oContentRoot = _Html.DocumentNode.SelectSingleNode(_Mapper.Content);
             HtmlNodeCollection oChildNodes = oContentRoot.ChildNodes;
@@ -270,7 +341,9 @@ namespace com.charlie.ebook.web.article
                             string sImageDesc = sImageDescSource.Length == 2 ? xImageDescNodes[i].Attributes[sImageDescSource[1]].Value : xImageDescNodes[i].InnerHtml;
 
                             string sImageFileName = DownloadImage(sImageUrl, sImageIndex);
-                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sImageFileName + "\" /></td></tr>" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
+
+
+                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sImageFileName + "\" /></td></tr>" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
                         }
                     }
                 }
@@ -305,14 +378,16 @@ namespace com.charlie.ebook.web.article
 
                                 string sImageUrl = xImageNode.Attributes[sImageAttribute].Value;
                                 string sDescXPath = sImageDescSource[1];
-                                string sImageDesc = xImageDescNodes[i].Attributes[sDescXPath].Value;
+                                string sImageDesc = "";
+                                if (xImageDescNodes[i] != null)
+                                    sImageDesc = xImageDescNodes[i].Attributes[sDescXPath]?.Value;  
 
                                 string sDownloadedName = ArticleId + "_" + nImageIndex.ToString("000");
                                 string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
 
                                 if (sReturnedFileName != "")
                                 {
-                                    sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
+                                    sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
                                     nImageIndex++;
                                     bImageDetected = true;
                                 }
@@ -334,7 +409,7 @@ namespace com.charlie.ebook.web.article
 
                         if (sReturnedFileName != "")
                         {
-                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n<p />\r\n";
+                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
                             nImageIndex++;
                             bImageDetected = true;
                         }
@@ -343,7 +418,7 @@ namespace com.charlie.ebook.web.article
 
                 if (!bImageDetected)
                 {
-                    Content += ParseRecurse(oChildNode);
+                    Content += RecursiveParse(oChildNode);
                 }
             }
         }
@@ -358,18 +433,25 @@ namespace com.charlie.ebook.web.article
             sXhtmlContents += "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"zh-tw\">\r\n";
             sXhtmlContents += "<head>\r\n";
             sXhtmlContents += "  <link href=\"../styles/stylesheet.css\" rel=\"stylesheet\" type=\"text/css\"/>\r\n";
-            sXhtmlContents += "  <title>" + Title + "</title>\r\n";
+            sXhtmlContents += "  <title>" + _Source + Title + "</title>\r\n";
             sXhtmlContents += "</head>\r\n";
             sXhtmlContents += "<body>\r\n";
-            sXhtmlContents += "<table class=\"articleTitle\"><tr><td>" + Title + "</td></tr>\r\n";
+            sXhtmlContents += "<table class=\"articleTitle\"><tr><td>" + _Source + Title + "</td></tr>\r\n";
             sXhtmlContents += "<tr><td>" + PubDate + "</td></tr></table>\r\n";
-            sXhtmlContents += Summary == ""? "<p>" + Summary + "</p>\r\n" : "";
+            sXhtmlContents += (Summary != "" && Summary != null)? "<p>" + Summary + "</p>\r\n" : "";
             sXhtmlContents += Content + "\r\n";
-            sXhtmlContents += Author == ""? "<p>" + Author + "</p>\r\n" : "";
+            sXhtmlContents += (Author != "" && Author != null)? "<p>" + Author + "</p>\r\n" : "";
             sXhtmlContents += "</body></html>";
 
-            string sFilename = "output\\OEBPS\\text\\" + Filename;
+            string sFilename = _AppDir + "output\\OEBPS\\text\\" + Filename;
             System.IO.File.WriteAllText(sFilename, sXhtmlContents);
+
+            // Update last visited url
+            if (!_Index)
+            {
+                _Mapper.LastVisit = ArticleUrl;
+                _Mapper.Save();
+            }
         }
     }
 }

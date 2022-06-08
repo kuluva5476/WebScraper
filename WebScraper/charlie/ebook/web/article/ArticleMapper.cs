@@ -15,15 +15,13 @@ namespace com.charlie.ebook.web.article
         public string IndexUrl { get;  private set; }
         public string IndexListXPath { get; private set; }
         public string IndexItemXPath { get;  private set; }
+        public bool CheckArticleDate { get; private set; }
         public List<string> IndexItemFilter { get;  set; }
-
         public List<string> ContentFilters { get; set; }
         public string Caption { get; private set; }
-
         public string Title { get; private set; }
         public string Author { get; private set; }
         public string PubDate { get; private set; }
-        public string ModDate { get; private set; }
         public string Summary { get; private set; }
         public string Content { get; private set; }
 
@@ -34,10 +32,7 @@ namespace com.charlie.ebook.web.article
         public string TopImageSource { get; private set; }
         public string TopImageDesc { get; private set; }
 
-        public ArticleMapper()
-        { 
-        
-        }
+        public string LastVisit { get; set; }
 
         public void LoadMapper(string _MapName)
         {
@@ -52,6 +47,7 @@ namespace com.charlie.ebook.web.article
             IndexUrl = xNode.SelectSingleNode("./index").Attributes["url"].Value;
             IndexListXPath = xNode.SelectSingleNode("./index").Attributes["list_xpath"].Value;
             IndexItemXPath = xNode.SelectSingleNode("./index").Attributes["item_xpath"].Value;
+            CheckArticleDate = xNode.SelectSingleNode("./index").Attributes["check_article_date"].Value == "true";
             IndexItemFilter = new List<string>();
             XmlNodeList xFilters = xNode.SelectSingleNode("./index").ChildNodes;
             foreach (XmlNode xFilter in xFilters)
@@ -65,10 +61,10 @@ namespace com.charlie.ebook.web.article
             {
                 ContentFilters.Add(xFilter.Attributes["value"].Value);
             }
+            LastVisit = xNode.SelectSingleNode("./article").Attributes["last_visit"].Value;
             Title = xNode.SelectSingleNode("./article/title").Attributes["xpath"].Value;
             Author = xNode.SelectSingleNode("./article/author").Attributes["xpath"].Value;
             PubDate = xNode.SelectSingleNode("./article/publish_date").Attributes["xpath"].Value;
-            ModDate = xNode.SelectSingleNode("./article/modified_date").Attributes["xpath"].Value;
             Summary = xNode.SelectSingleNode("./article/summary").Attributes["xpath"].Value;
             Content = xNode.SelectSingleNode("./article/content").Attributes["xpath"].Value;
             ContentImageSource = xNode.SelectSingleNode("./article/content").Attributes["image_source"].Value;
@@ -77,5 +73,35 @@ namespace com.charlie.ebook.web.article
             TopImageSource = xNode.SelectSingleNode("./article/top_image").Attributes["image_source"].Value;
             TopImageDesc = xNode.SelectSingleNode("./article/top_image").Attributes["image_desc"].Value;
         }
+
+        public void Save()
+        {
+            XmlDocument xXmlDoc = new XmlDocument();
+            string sMappingTemplate = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.xml");
+            xXmlDoc.Load(sMappingTemplate);
+            XmlNode xNode = xXmlDoc.SelectSingleNode("/configurations/mappings/map[@name='" + MapName + "']");
+
+            if (xNode != null)
+            {
+                //xNode.Attributes["caption"].Value = Caption;
+                //xNode.SelectSingleNode("./index").Attributes["url"].Value = IndexUrl;
+                //xNode.SelectSingleNode("./index").Attributes["list_xpath"].Value = IndexListXPath;
+                //xNode.SelectSingleNode("./index").Attributes["item_xpath"].Value = IndexItemXPath;
+                //xNode.SelectSingleNode("./index").Attributes["check_article_date"].Value = (CheckArticleDate.ToString());
+                xNode.SelectSingleNode("./article").Attributes["last_visit"].Value = LastVisit;
+                //xNode.SelectSingleNode("./article/title").Attributes["xpath"].Value = Title;
+                //xNode.SelectSingleNode("./article/author").Attributes["xpath"].Value = Author;
+                //xNode.SelectSingleNode("./article/publish_date").Attributes["xpath"].Value = PubDate;
+                //xNode.SelectSingleNode("./article/summary").Attributes["xpath"].Value = Summary;
+                //xNode.SelectSingleNode("./article/content").Attributes["xpath"].Value = Content;
+                //xNode.SelectSingleNode("./article/content").Attributes["image_source"].Value = ContentImageSource;
+                //xNode.SelectSingleNode("./article/content").Attributes["image_desc"].Value = ContentImageDesc;
+                //xNode.SelectSingleNode("./article/top_image").Attributes["xpath"].Value = TopImage;
+                //xNode.SelectSingleNode("./article/top_image").Attributes["image_source"].Value = TopImageSource;
+                //xNode.SelectSingleNode("./article/top_image").Attributes["image_desc"].Value = TopImageDesc;
+                xXmlDoc.Save(sMappingTemplate);
+            }
+        }
+
     }
 }

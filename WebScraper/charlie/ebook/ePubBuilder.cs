@@ -2,34 +2,46 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.IO.Compression;
 using com.charlie.ebook.web.article;
+using System.Drawing;
 
 namespace com.charlie.ebook
 {
     class ePubBuilder
     {
         private string Title { get; set; }
+        private string _AppDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
+        List<string> _ImageList = new List<string>();
 
         public ePubBuilder()
         {
-            Title = "查理的新聞匯報-" + System.DateTime.Now.ToString("yyyy-MM-dd"); 
+            Title = "查理的新聞匯報 " + System.DateTime.Now.ToString("yyyy-MM-dd"); 
         }
-        public void InitFolders()
+
+        private void InitFolders()
         {
-            try
+            Directory.Delete(_AppDir + "output", true); 
+            XCopy(_AppDir + "empty", _AppDir + "output");
+        }
+
+
+        private void RecursiveSave(Article _Article)
+        {
+            _Article.Save();
+            foreach (Article oSubArticle in _Article.SubArticles)
             {
-                Directory.Delete("output", true); 
+                RecursiveSave(oSubArticle);
             }
-            catch { }
-            XCopy("empty", "output");
         }
 
         public void Generate()
         {
+            // Copy template folder structures to output
+            InitFolders();
+
+            // Rest
             XmlDocument xXmlDoc = new XmlDocument();
             string sConfigFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.xml");
             xXmlDoc.Load(sConfigFile);
@@ -42,8 +54,15 @@ namespace com.charlie.ebook
             {
                 string sNewsSource = xNode.Attributes["map_name"].Value;
                 Article oIndex = new Article(sNewsSource, 0);
-                ArticleList.Add(oIndex);
-                oIndex.Save();
+                if (oIndex.SubArticles.Count > 0)
+                {
+                    ArticleList.Add(oIndex);
+                }
+            }
+
+            foreach (Article oArticle in ArticleList)
+            {
+                RecursiveSave(oArticle);
             }
 
             string uid = Guid.NewGuid().ToString();
@@ -57,7 +76,6 @@ namespace com.charlie.ebook
             {
                 sNavMap += NavMap(oArticle, nLevel, nPlayOrder);
             }
-
 
             string sNavHead = "";
             sNavHead += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
@@ -74,7 +92,7 @@ namespace com.charlie.ebook
             sNavHead += "\t<navMap>\r\n";
 
             sNavMap = sNavHead + sNavMap + "\t<navMap>\r\n</ncx>\r\n";
-            System.IO.File.WriteAllText("output\\OEBPS\\toc.ncx", sNavMap);
+            System.IO.File.WriteAllText(_AppDir + "output\\OEBPS\\toc.ncx", sNavMap);
             #endregion
 
             #region content.opf
@@ -97,7 +115,7 @@ namespace com.charlie.ebook
 
             sManifest += "\t\t<item href=\"toc.ncx\" id=\"ncx\" media-type=\"application/x-dtbncx+xml\"/>\r\n";
             sManifest += "\t\t<item href=\"styles/stylesheet.css\" id=\"main-css\" media-type=\"text/css\"/>\r\n";
-            sManifest += "\t\t<item href=\"images/cover.jpg\" id=\"cover-image\" media-type=\"image/jpeg\"/>\r\n";
+            sManifest += "\t\t<item href=\"images/cover.png\" id=\"cover-image\" media-type=\"image/png\"/>\r\n";
             sManifest += "\t\t<item href=\"text/coverpage.xhtml\" id=\"coverpage.xhtml\" media-type=\"application/xhtml+xml\"/>\r\n";
             foreach (Article oArticle in ArticleList)
             {
@@ -115,27 +133,156 @@ namespace com.charlie.ebook
             sSpine = "\t<spine toc=\"ncx\" >\r\n" + sSpine + "\t</spine>\r\n";
 
             sContentOpf = sContentHead + sManifest + sSpine + "</package>\r\n";
-            System.IO.File.WriteAllText("output\\OEBPS\\content.opf", sContentOpf);
+            System.IO.File.WriteAllText(_AppDir + "output\\OEBPS\\content.opf", sContentOpf);
             #endregion
 
+            // Cover Image
+            CreateCoverImage().Save(_AppDir + "\\output\\OEBPS\\images\\cover.png", System.Drawing.Imaging.ImageFormat.Png);
+
             #region Zip
-            string sEPub = Title + ".epub";
+            string sEPub = "Z:\\news\\" + Title + ".epub";
             if (System.IO.File.Exists(sEPub))
                 System.IO.File.Delete(sEPub);
-            ZipFile.CreateFromDirectory("output", sEPub);
+            ZipFile.CreateFromDirectory(_AppDir + "output", sEPub);
             #endregion
 
 
         }
 
+        public void Test()
+        {
+            _ImageList.Clear();
+            SelectImages();
+            CreateCoverImage().Save(_AppDir + "created.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+        }
+        
+        //private Image CreateImage()
+        //{
+        //    Bitmap bmp = new Bitmap(600, 800);
+        //    using (Graphics g = Graphics.FromImage(bmp))
+        //    {
+        //        Rectangle oRec = new Rectangle(0, 0, 600, 800);
+        //        g.FillRectangle(Brushes.White, oRec);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[0], 580, 148), 10, 10);
+        //        g.DrawRectangle(Pens.Black, 10, 10, 580, 148);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[1], 180, 148), 10, 168);
+        //        g.DrawRectangle(Pens.Black, 10, 168, 180, 148);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[3], 390, 148), 200, 168);
+        //        g.DrawRectangle(Pens.Black, 200, 168, 390, 148);
+
+        //        g.DrawRectangle(Pens.Black, 10, 326, 380, 148);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[3], 190, 306), 400, 326);
+        //        g.DrawRectangle(Pens.Black, 400, 326, 190, 306);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[4], 380, 148), 10, 484);
+        //        g.DrawRectangle(Pens.Black, 10, 484, 380, 148);
+
+        //        g.DrawImage(LoadImageCropped(_ImageList[5], 380, 148), 10, 642);
+        //        g.DrawRectangle(Pens.Black, 10, 642, 380, 148);
+
+        //        g.DrawRectangle(Pens.Black, 400, 642, 190, 148);
+
+        //        int nFont = 48;
+        //        Font oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+        //        Brush oBrush = new SolidBrush(ColorTranslator.FromHtml("#222222"));
+        //        string sTitle = "查理の新聞匯報";
+        //        g.DrawString(sTitle, oTitleFont, oBrush, 14, 350);
+        //        nFont = 56;
+        //        oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+        //        g.DrawString(System.DateTime.Now.ToString("MMM.dd"), oTitleFont, oBrush, 405, 640);
+        //        nFont = 50;
+        //        oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+        //        g.DrawString(System.DateTime.Now.ToString("yyyy"), oTitleFont, oBrush, 470, 700);
+        //    }
+
+        //    return bmp;
+        //}
+
+        //public Image LoadImageCropped(string _Filename, int _Width, int _Height)
+        //{
+        //    using (var oFile = new FileStream(_Filename, FileMode.Open))
+        //    {
+        //        var oImageFromFile = new Bitmap(oFile);
+        //        Image oResult;
+
+        //        // zoom (width)
+        //        if (oImageFromFile.Width < _Width)
+        //        {
+        //            float nFactor = _Width / oImageFromFile.Width;
+        //            Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+        //            oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+        //        }
+        //        // zoom (height)
+        //        if (oImageFromFile.Height < _Height)
+        //        {
+        //            float nFactor = _Height / oImageFromFile.Height;
+        //            Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+        //            //oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+        //        }
+
+
+        //        Random nRandom = new Random();
+        //        // Crop (choose starting location)
+        //        int nStartX = 0;
+        //        int nStartY = 0;
+        //        if (oImageFromFile.Width > _Width)
+        //        {
+        //            nStartX = nRandom.Next(0, oImageFromFile.Width - _Width);
+        //        }
+
+        //        if (oImageFromFile.Height > _Height)
+        //        {
+        //            nStartY = nRandom.Next(0, oImageFromFile.Height - _Height);
+        //        }
+
+        //        // zoom & crop
+        //        return oImageFromFile.Clone(new Rectangle(nStartX, nStartY, _Width, _Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+        //        //.Clone(_Rectangle, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+        //        //Image oCoverImage = new Bitmap(oImageFile, _Rectangle.Width, _Rectangle.Height);
+        //        //Image TempImage = (Bitmap)oCoverImage.Clone();
+        //        //oImageFile.Dispose();
+        //        ////_CoverImage = TempImage;
+        //        //return TempImage;
+        //    }
+        //}
+        private void SelectImages()
+        {
+            string sImageDir = _AppDir + "output\\OEBPS\\images\\";
+
+            string[] FileList = Directory.EnumerateFiles(sImageDir, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg")).ToArray<string>();
+
+            _ImageList.Clear();
+
+            Random nRandom = new Random();
+            for (int i = 0; i < 6; i++)
+            {
+                int nIndex = nRandom.Next(0, FileList.Length);
+
+                while (_ImageList.Contains(FileList[nIndex]) || FileList[nIndex].Contains("cover.png"))
+                {
+                    nIndex = nRandom.Next(0, FileList.Length);
+                }
+                _ImageList.Add(FileList[nIndex]);
+            }
+        }
+
         #region Helper functions
+
+        #region eBook Helpers
         private string NavMap(Article _Article, int _Level, int _PlayOrder)
         {
             string sNavMap = "";
             string sIndent = repeat("\t", _Level + 2);
             sNavMap += sIndent + "<navPoint id=\"" + _Article.ArticleId + "\" playOrder=\"" + _PlayOrder.ToString() + "\" >\r\n";
             sNavMap += sIndent + "\t<navLabel>\r\n";
-            sNavMap += sIndent + "\t\t<text>" + _Article.Title + "</text>\r\n";
+            sNavMap += sIndent + "\t\t<text>" + _Article.Title + (_Level ==0? " (" + _Article.SubArticles.Count.ToString() + ")":"") +  "</text>\r\n";
             sNavMap += sIndent + "\t</navLabel>\r\n";
             sNavMap += sIndent + "\t<content src=\"text/" + _Article.Filename + "\" />\r\n";
             foreach (Article oSubArticle in _Article.SubArticles)
@@ -167,7 +314,181 @@ namespace com.charlie.ebook
             }
             return sManifest;
         }
+        #endregion
 
+        #region Image manipulations
+
+        private Image PrintCoverDate()
+        {
+            Bitmap bmp = new Bitmap(_AppDir + "empty\\OEBPS\\images\\cover.jpg");
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                int nFont = 56;
+                Font oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                Brush oBrush = new SolidBrush(ColorTranslator.FromHtml("#222222"));
+                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                g.DrawString(System.DateTime.Now.ToString("MMM.dd"), oTitleFont, oBrush, 405, 640);
+                nFont = 50;
+                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                g.DrawString(System.DateTime.Now.ToString("yyyy"), oTitleFont, oBrush, 470, 700);
+            }
+            return bmp;
+        }
+
+        private Image CreateCoverImage()
+        {
+            SelectImages();
+            Bitmap bmp = new Bitmap(600, 800);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                Brush oBrush = new SolidBrush(ColorTranslator.FromHtml("#a0a0a0"));
+                g.FillRectangle(oBrush, 0, 0, 600, 800);
+
+                Image Cover1 = new Bitmap(580, 780);
+                Image Cover2 = new Bitmap(470, 130);
+                Image Cover3 = new Bitmap(490, 160);
+
+                try
+                {
+                    Cover1 = LoadImageCropped(_ImageList[0], 580, 780);
+                }
+                catch (Exception ex)
+                { }
+
+                try
+                {
+                    Cover2 = LoadImageCropped(_ImageList[1], 470, 130);
+                }
+                catch (Exception ex)
+                { }
+
+                try
+                {
+                    Cover3 = LoadImageCropped(_ImageList[2], 490, 160);
+                }
+                catch (Exception ex)
+                { }
+
+                // Cover 1
+                g.DrawImage(Cover1, 10, 10);
+
+                // Cover 2
+                g.FillRectangle(Brushes.White, 100, 385, 480, 140);
+                g.DrawRectangle(Pens.Black, 100, 385, 480, 140);
+                g.DrawRectangle(Pens.Black, 105, 390, 470, 130);
+                g.DrawImage(Cover2, 105, 390);
+
+                // Cover 3
+                g.FillRectangle(Brushes.White, 20, 580, 500, 170);
+                g.DrawRectangle(Pens.Black, 20, 580, 500, 170);
+                g.DrawRectangle(Pens.Black, 25, 585, 490, 160);
+                g.DrawImage(Cover3, 25, 585);
+
+                // From template file
+                Bitmap transparent = new Bitmap(_AppDir + "empty\\OEBPS\\images\\cover.png");
+                g.DrawImage(transparent, 0, 0);
+
+                // Date
+                g.DrawRectangle(Pens.Black, 10, 10, 300, 300);
+                int nFont = 160;
+                Font oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+
+                // Determine day of week
+                string[] sColor = { "#bb5555", "#222222", "#222277", "#222222", "#222222", "#222222", "#447755" };
+
+                string[] sWeekday = { "日", "一", "二", "三", "四", "五", "六" };
+                int nDayOfWeek = (int)System.DateTime.Now.DayOfWeek;
+
+                oBrush = new SolidBrush(ColorTranslator.FromHtml(sColor[nDayOfWeek]));
+                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                g.DrawString(System.DateTime.Now.ToString("dd"), oTitleFont, oBrush, 10, 0);
+                g.ScaleTransform((float)0.5, (float)1.3);
+                oTitleFont = new Font("Microsoft Yi Baiti", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                g.DrawString(sWeekday[nDayOfWeek], oTitleFont, oBrush, 400, 20);
+
+                g.ResetTransform();
+                nFont = 42;
+                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
+                g.DrawString(System.DateTime.Now.ToString("yyyy MMM"), oTitleFont, oBrush, 30, 170);
+
+            }
+            return bmp;
+        }
+
+        public Image LoadImageCropped(string _Filename, int _Width, int _Height)
+        {
+            using (var oFile = new FileStream(_Filename, FileMode.Open))
+            {
+                var oImageFromFile = new Bitmap(oFile);
+                Image oResult;
+
+                // zoom (width)
+                if (oImageFromFile.Width < _Width)
+                {
+                    float nFactor = _Width / oImageFromFile.Width;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+                else
+                {
+                    float nFactor = (float)(_Width + 200) / oImageFromFile.Width;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+
+                // zoom (height)
+                if (oImageFromFile.Height < _Height)
+                {
+                    float nFactor = (float)_Height / oImageFromFile.Height;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+                else
+                {
+                    float nFactor = (float)(_Height + 300) / oImageFromFile.Height;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+
+                if (oImageFromFile.Width < _Width)
+                {
+                    float nFactor = (float)_Width / oImageFromFile.Width;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+
+                if (oImageFromFile.Height < _Height)
+                {
+                    float nFactor = (float)_Height / oImageFromFile.Height;
+                    Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
+                    oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
+                }
+
+                Random nRandom = new Random();
+                // Crop (choose starting location)
+                int nStartX = 0;
+                int nStartY = 0;
+                if (oImageFromFile.Width > _Width)
+                {
+                    nStartX = nRandom.Next(0, oImageFromFile.Width - _Width);
+                }
+
+                if (oImageFromFile.Height > _Height)
+                {
+                    nStartY = nRandom.Next(0, oImageFromFile.Height - _Height);
+                }
+
+                // zoom & crop
+                oResult = oImageFromFile.Clone(new Rectangle(nStartX, nStartY, _Width, _Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                oImageFromFile.Dispose();
+                return oResult;
+            }
+        }
+
+        #endregion
+
+        #region Misc.
         public bool XCopy(string SourcePath, string DestinationPath)
         {
             SourcePath = SourcePath.EndsWith(@"\") ? SourcePath : SourcePath + @"\";
@@ -214,6 +535,7 @@ namespace com.charlie.ebook
             }
             return s;
         }
+        #endregion
         #endregion
     }
 }

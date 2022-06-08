@@ -1,26 +1,25 @@
 ﻿using System;
 using com.charlie.ebook;
-using com.charlie.ebook.web.article;
 
 namespace com.charlie.main
 {
     class Program
     {
-        static string _OutputFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output.txt");
+        static string _OutputFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Output" + System.DateTime.Now.ToString("yyyyMMdd") + ".txt");
         private static void ClearOutput()
         {
             System.IO.File.WriteAllText(_OutputFile, "");
         }
 
-        private static void AddText(string _Text="\r\n")
+        public static void AddText(string _Text="\r\n")
         {
-            System.IO.File.AppendAllText(_OutputFile, _Text + "\r\n");
+            System.IO.File.AppendAllText(_OutputFile, System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss\t" + _Text + "\r\n"));
         }
 
         static void Main(string[] args)
         {
             ePubBuilder oEpub = new ePubBuilder();
-            oEpub.InitFolders();
+            //oEpub.Test();
             oEpub.Generate();
 
             #region Single Article Tests

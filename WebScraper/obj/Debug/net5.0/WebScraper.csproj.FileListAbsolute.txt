@@ -17,7 +17,6 @@ E:\repo\WebScraper\WebScraper\obj\Debug\net5.0\WebScraper.pdb
 E:\repo\WebScraper\WebScraper\obj\Debug\net5.0\WebScraper.genruntimeconfig.cache
 E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\Newtonsoft.Json.dll
 E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\WebDriver.dll
-E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\Ionic.Zip.dll
 E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\Config.xml
 D:\repo\WebScraper\WebScraper\bin\Debug\net5.0\WebScraper.exe
 D:\repo\WebScraper\WebScraper\bin\Debug\net5.0\Config.xml
@@ -40,3 +39,8 @@ D:\repo\WebScraper\WebScraper\obj\Debug\net5.0\WebScraper.dll
 D:\repo\WebScraper\WebScraper\obj\Debug\net5.0\ref\WebScraper.dll
 D:\repo\WebScraper\WebScraper\obj\Debug\net5.0\WebScraper.pdb
 D:\repo\WebScraper\WebScraper\obj\Debug\net5.0\WebScraper.genruntimeconfig.cache
+E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\Microsoft.Win32.SystemEvents.dll
+E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\System.Drawing.Common.dll
+E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\runtimes\win\lib\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
+E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\runtimes\unix\lib\netcoreapp3.1\System.Drawing.Common.dll
+E:\repo\WebScraper\WebScraper\bin\Debug\net5.0\runtimes\win\lib\netcoreapp3.1\System.Drawing.Common.dll
