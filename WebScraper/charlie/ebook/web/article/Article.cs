@@ -12,7 +12,7 @@ namespace com.charlie.ebook.web.article
     class Article
     {
         private string _AppDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
-        private int _Max = 30;
+        private int _Max = 50;
 
         private int ArticleNo { get; set; }
         public string ArticleUrl { get; private set; }
@@ -27,8 +27,9 @@ namespace com.charlie.ebook.web.article
 
         private bool _Index = false;
 
-        private string _Source = "";
+        private int _ImageIndex = 1;
 
+        private string _Source = "";
 
         public List<Article> SubArticles = new List<Article>();
 
@@ -81,10 +82,171 @@ namespace com.charlie.ebook.web.article
             _Index = false;
         }
 
-        public void LoadHtml()
+
+        /// <summary>
+        /// Parse Child Nodes
+        /// </summary>
+        /// <param name="_RootNode"></param>
+        /// <returns></returns>
+        public string RecursiveParse(HtmlNode _RootNode)
         {
-            _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
+            string sReturn = "";
+            bool bContinue = true;
+            // If script node, do nothing
+            if (_RootNode.Name.ToLower() == "script")
+                bContinue = false;
+            // Check for filters (Ads, ad news)
+            foreach (string sFilter in _Mapper.ContentFilters)
+            {
+                string sAttributes = "";
+                foreach (HtmlAttribute oAttribute in _RootNode.Attributes)
+                    sAttributes += oAttribute.Value + " ";
+
+                if (sAttributes.Contains(sFilter))
+                    bContinue = false;
+            }
+
+            if (bContinue)
+            {
+                string sTable = "";
+                string[] sImageMapperTokens = _Mapper.ContentImageSource.Split(" --> "); // 0: wrapper, 1: xpath, 2: attribute, 3: alternative
+                string sWrapperName = sImageMapperTokens[0];
+                string sImageXPath = sImageMapperTokens[1];
+                string sImageAttribute = sImageMapperTokens[2];
+                string sAltImageAttribute = sImageMapperTokens[3];
+
+                bool bImageDetected = false;
+                // Check for image
+
+                // No wrapper tag, plain img tag
+                if (sWrapperName == "" && _RootNode.Name.ToLower() == "img")
+                {
+                    if (sImageAttribute != "")
+                    {
+                        string[] sImageDescSource = _Mapper.ContentImageDesc.Split(" --> ");
+
+                        string sImageUrl;
+                        sImageUrl = _RootNode.Attributes[sImageAttribute]?.Value;
+                        if (sImageUrl == null)
+                            sImageUrl = _RootNode.Attributes[sAltImageAttribute]?.Value;
+
+                        string sDescXPath = sImageDescSource[1];
+                        string sImageDesc = _RootNode.Attributes[sDescXPath]?.Value;
+                        sImageDesc = (sImageDesc == null ? "" : sImageDesc);
+
+                        string sDownloadedName = ArticleId + "_" + _ImageIndex.ToString("000");
+                        string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
+
+                        if (sReturnedFileName != "")
+                        {
+                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
+                            _ImageIndex++;
+                            bImageDetected = true;
+                        }
+                    }
+                }
+                else
+                {
+                    if (_RootNode.Name == sWrapperName)
+                    {
+                        sTable = "";
+                        if (sImageXPath != "")
+                        {
+                            HtmlNodeCollection xImageNodes = _RootNode.SelectNodes(sImageXPath);
+                            // Image detected, this ChildNode is the wrapper
+                            if (xImageNodes != null)
+                            {
+                                string[] sImageDescSource = _Mapper.ContentImageDesc.Split(" --> ");
+
+                                HtmlNodeCollection xImageDescNodes = _RootNode.SelectNodes(sImageDescSource[0]);
+
+                                for (int i = 0; i < xImageNodes.Count; i++)
+                                {
+                                    HtmlNode xImageNode = xImageNodes[i];
+
+                                    string sImageUrl;
+                                    sImageUrl = xImageNode.Attributes[sImageAttribute]?.Value;
+                                    if (sImageUrl == null)
+                                        sImageUrl = xImageNode.Attributes[sAltImageAttribute]?.Value;
+                                    string sDescXPath = sImageDescSource[1];
+                                    string sImageDesc = "";
+                                    if (xImageDescNodes[i] != null)
+                                        sImageDesc = xImageDescNodes[i].Attributes[sDescXPath]?.Value;
+
+                                    string sDownloadedName = ArticleId + "_" + _ImageIndex.ToString("000");
+                                    string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
+
+                                    if (sReturnedFileName != "")
+                                    {
+                                        sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
+                                        _ImageIndex++;
+                                        bImageDetected = true;
+                                    }
+                                }
+                                Content += sTable;
+                            }
+                        }
+                    }
+                }
+                // if image detected
+                if (bImageDetected)
+                    sReturn += sTable;
+                // ok, not image
+                else //(!bImageDetected)
+                {
+                    // If has childs then recursive
+                    if (_RootNode.HasChildNodes)
+                    {
+                        // assuming these are end nodes
+                        if (_RootNode.Name.ToLower() == "h2" || _RootNode.Name.ToLower() == "h3")
+                        {
+                            sReturn += "<p>";
+                            foreach (HtmlNode oInnerNode in _RootNode.ChildNodes)
+                            {
+                                if (oInnerNode.Name == "a")
+                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
+                                else if (oInnerNode.Name == "#text")
+                                    sReturn += oInnerNode.InnerText;
+                                else
+                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
+                            }
+                            sReturn += "</p>\r\n";
+                        }
+                        // if p tags wrap the child nodes around
+                        else if (_RootNode.Name.ToLower() == "p")
+                            foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
+                                sReturn = "<p>" + RecursiveParse(oChildNode) + "</p>\r\n";
+                        // others just send child nodes to parse
+                        else
+                            foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
+                                sReturn += RecursiveParse(oChildNode);
+                    }
+                    // No childs, just get the text
+                    else
+                    {
+                        if (_RootNode.InnerText.Trim() != "")
+                            sReturn = _RootNode.InnerText.Trim();
+                        else
+                        {
+                            if (_RootNode.Name.ToLower() == "br")
+                                sReturn = "<br />";
+                        }
+                    }
+                }
+            }
+            return sReturn;
         }
+
+        //public void LoadHtml()
+        //{
+        //    _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
+        //}
+
+        /// <summary>
+        /// Call chromium, navigate to the url and wait until loaded, or until time-out
+        /// </summary>
+        /// <param name="_Url">Url to be loaded</param>
+        /// <returns>HTML code of the loaded url</returns>
         private async Task<string> LoadHtmlAsync(string _Url)
         {
             IWebDriver _Driver;
@@ -126,7 +288,7 @@ namespace com.charlie.ebook.web.article
 
             List<string> sUrls = GetArticleUrls();
             
-            string sCheckDate = System.DateTime.Now.ToString("yyyyMMdd");
+            //string sCheckDate = System.DateTime.Now.ToString("yyyyMMdd");
 
             int nIndex = 1;
             SubArticles.Clear();
@@ -142,10 +304,10 @@ namespace com.charlie.ebook.web.article
                     if (oArticle.Content == "")
                         continue;
 
-                    DateTime oArticleDate;
-                    DateTime.TryParse(oArticle.PubDate.Split(" ")[0].Split("星期")[0], out oArticleDate);
-                    if ((oArticleDate.ToString("yyyyMMdd") != sCheckDate) && _Mapper.CheckArticleDate)
-                        break;
+                    //DateTime oArticleDate;
+                    //DateTime.TryParse(oArticle.PubDate.Split(" ")[0].Split("星期")[0], out oArticleDate);
+                    //if ((oArticleDate.ToString("yyyyMMdd") != sCheckDate) && _Mapper.CheckArticleDate)
+                    //    break;
 
                     // "Stack" into SubArticle queue
                     SubArticles.Insert(0, oArticle);
@@ -170,6 +332,11 @@ namespace com.charlie.ebook.web.article
             Content = sTable;
         }
 
+        /// <summary>
+        /// Grabs all article urls from main page
+        /// until hit last-visited article, or reach maximum number of articles
+        /// </summary>
+        /// <returns></returns>
         private List<string> GetArticleUrls()
         {
             List<string> ArticleItems = new List<string>();
@@ -183,8 +350,10 @@ namespace com.charlie.ebook.web.article
             {
                 foreach (HtmlNode oNode in xNodeList)
                 {
+                    // Don't want to grab all...
                     if (ArticleItems.Count >= _Max)
                         break;
+
                     HtmlNode oArticleNode = _Mapper.IndexItemXPath == "" ? oNode : oNode.SelectSingleNode(_Mapper.IndexItemXPath);
                     if (oArticleNode != null)
                     {
@@ -193,10 +362,10 @@ namespace com.charlie.ebook.web.article
                         Uri oBase = new Uri(_Mapper.IndexUrl);
                         sHref = (new Uri(oBase, sHref)).AbsoluteUri;
 
+                        // Been here before? then stop here
                         if (sHref == _Mapper.LastVisit)
                             break;
 
-                        //string sTitle = oArticleNode.InnerText;
                         bool bContinue = false;
 
                         // Filter unwanted...
@@ -216,6 +385,12 @@ namespace com.charlie.ebook.web.article
             return ArticleItems;
         }
 
+        /// <summary>
+        /// Download image to intermidiate output folder
+        /// </summary>
+        /// <param name="_Url">Url of the image</param>
+        /// <param name="_ImageIndex">Counter</param>
+        /// <returns></returns>
         private string DownloadImage(string _Url, string _ImageIndex)
         {
             WebClient oDownloader = new WebClient();
@@ -238,69 +413,15 @@ namespace com.charlie.ebook.web.article
             return sReturnFileName;
         }
 
-        // Recursively parse div nodes
-        private string RecursiveParse(HtmlNode _RootNode)
-        {
-            string sReturn = "";
-
-            // If script node, do nothing
-            if (_RootNode.Name.ToLower() != "script")
-            {
-                bool bContinue = true;
-                foreach (string sFilter in _Mapper.ContentFilters)
-                {
-                    if (_RootNode.OuterHtml.Contains(sFilter))
-                        bContinue = false;
-                }
-                if (bContinue)
-                {
-                    // If has childs then recursive
-                    if (_RootNode.HasChildNodes)
-                    {
-                        // assuming these are end nodes
-                        if (_RootNode.Name.ToLower() == "p" || _RootNode.Name.ToLower() == "h2" || _RootNode.Name.ToLower() == "h3")
-                        {
-                            sReturn += "<p>";
-                            foreach (HtmlNode oInnerNode in _RootNode.ChildNodes)
-                            {
-                                if (oInnerNode.Name == "a")
-                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
-                                else if (oInnerNode.Name == "#text")
-                                    sReturn += oInnerNode.InnerText;
-                                else
-                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
-                            }
-                            sReturn += "</p>\r\n";
-                        }
-                        else
-                            foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
-                            {
-                                sReturn += RecursiveParse(oChildNode);
-                            }
-                    }
-                    else
-                    {
-                        if (_RootNode.InnerText.Trim() != "")
-                            sReturn = _RootNode.InnerText.Trim();
-                        else
-                        {
-                            if (_RootNode.Name.ToLower() == "br")
-                                sReturn = "<br />";
-                        }
-                    }
-                }
-            }
-            return sReturn;
-        }
-
-        private void TestParse()
-        { 
         
-        }
-
+        /// <summary>
+        /// Parse article informations (Title, Author, Publish Date, Title),
+        /// then call RecursiveParse to get contents of the article
+        /// </summary>
         private void Parse()
         {
-            LoadHtml();
+            //LoadHtml();
+            _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
             Content = "";
             Title = "";
             try
@@ -317,10 +438,10 @@ namespace com.charlie.ebook.web.article
             HtmlNode oContentRoot = _Html.DocumentNode.SelectSingleNode(_Mapper.Content);
             HtmlNodeCollection oChildNodes = oContentRoot.ChildNodes;
 
-            int nImageIndex = 1;
             Content = "";
             string sTable = "";
 
+            // Some article puts first image separately from content block, grab this first
             if (_Mapper.TopImage != "")
             {
                 HtmlNode xRootNode = _Html.DocumentNode.SelectSingleNode(_Mapper.TopImage);
@@ -350,79 +471,14 @@ namespace com.charlie.ebook.web.article
             }
             Content += sTable;
 
-            foreach (HtmlNode oChildNode in oChildNodes)
-            {
-                // Try select image node and see if exists
-                string[] sImageMapperTokens = _Mapper.ContentImageSource.Split(" --> "); // 0: wrapper, 1: xpath, 2: attribute
-                string sWrapperName = sImageMapperTokens[0];
-                string sImageXPath = sImageMapperTokens[1];
-                string sImageAttribute = sImageMapperTokens[2];
-
-                bool bImageDetected = false;
-                if (oChildNode.Name == sWrapperName)
-                {
-                    sTable = "";
-                    if (sImageXPath != "")
-                    {
-                        HtmlNodeCollection xImageNodes = oChildNode.SelectNodes(sImageXPath);
-                        // Image detected, this ChildNode is the wrapper
-                        if (xImageNodes != null)
-                        {
-                            string[] sImageDescSource = _Mapper.ContentImageDesc.Split(" --> ");
-
-                            HtmlNodeCollection xImageDescNodes = oChildNode.SelectNodes(sImageDescSource[0]);
-
-                            for (int i = 0; i < xImageNodes.Count; i++)
-                            {
-                                HtmlNode xImageNode = xImageNodes[i];
-
-                                string sImageUrl = xImageNode.Attributes[sImageAttribute].Value;
-                                string sDescXPath = sImageDescSource[1];
-                                string sImageDesc = "";
-                                if (xImageDescNodes[i] != null)
-                                    sImageDesc = xImageDescNodes[i].Attributes[sDescXPath]?.Value;  
-
-                                string sDownloadedName = ArticleId + "_" + nImageIndex.ToString("000");
-                                string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
-
-                                if (sReturnedFileName != "")
-                                {
-                                    sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
-                                    nImageIndex++;
-                                    bImageDetected = true;
-                                }
-                            }
-                            Content += sTable;
-                        }
-                    }
-                    // No wrapper, must be img tag...
-                    else if (sImageAttribute != "")
-                    {
-                        string[] sImageDescSource = _Mapper.ContentImageDesc.Split(" --> ");
-
-                        string sImageUrl = oChildNode.Attributes[sImageAttribute].Value;
-                        string sDescXPath = sImageDescSource[1];
-                        string sImageDesc = oChildNode.Attributes[sDescXPath]?.Value;
-
-                        string sDownloadedName = ArticleId + "_" + nImageIndex.ToString("000");
-                        string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
-
-                        if (sReturnedFileName != "")
-                        {
-                            sTable += "<table class=\"imageTable\"><tr><td><img src=\"../images/" + sReturnedFileName + "\" /></td></tr>\r\n" + ((sImageDesc.Trim() != "") ? "<tr><td>" + sImageDesc + "</td></tr>" : "") + "</table>\r\n";
-                            nImageIndex++;
-                            bImageDetected = true;
-                        }
-                    }
-                }
-
-                if (!bImageDetected)
-                {
-                    Content += RecursiveParse(oChildNode);
-                }
-            }
+            // Parse the rest thru RecursiveParse function
+            foreach (HtmlNode oChildNode in oContentRoot.ChildNodes)
+                Content += RecursiveParse(oChildNode);
         }
 
+        /// <summary>
+        /// Save the article to intermediate output folder
+        /// </summary>
         public void Save()
         {
             string sXhtmlContents = "";

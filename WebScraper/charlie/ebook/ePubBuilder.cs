@@ -12,6 +12,7 @@ namespace com.charlie.ebook
     class ePubBuilder
     {
         private string Title { get; set; }
+        private string OutputPath { get; set; }
         private string _AppDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
         List<string> _ImageList = new List<string>();
 
@@ -27,6 +28,11 @@ namespace com.charlie.ebook
         }
 
 
+        /// <summary>
+        /// Save article to output folder
+        /// Recursive loop for sub-articles
+        /// </summary>
+        /// <param name="_Article"></param>
         private void RecursiveSave(Article _Article)
         {
             _Article.Save();
@@ -36,45 +42,56 @@ namespace com.charlie.ebook
             }
         }
 
+        /// <summary>
+        /// Generate...
+        /// </summary>
         public void Generate()
         {
-            // Copy template folder structures to output
+            // Copy template folder structures to intermidiate output
             InitFolders();
 
-            // Rest
+            // Read config file
             XmlDocument xXmlDoc = new XmlDocument();
             string sConfigFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.xml");
             xXmlDoc.Load(sConfigFile);
 
+            XmlNode xEpub = xXmlDoc.SelectSingleNode("/configurations/config/epub");
+            Title = xEpub.Attributes["title"].Value + System.DateTime.Now.ToString("yyyy-MM-dd");
+            OutputPath = xEpub.Attributes["output_path"].Value;
+
             XmlNodeList xNewsSource = xXmlDoc.SelectNodes("/configurations/config/source");
+            List<Article> IndexList = new List<Article>();
 
-            List<Article> ArticleList = new List<Article>();
-
+            // Loop through every News Source defined in config file
             foreach (XmlNode xNode in xNewsSource)
             {
                 string sNewsSource = xNode.Attributes["map_name"].Value;
+                
+                // Top-level index, will grab all urls from source and populate sub-articles
                 Article oIndex = new Article(sNewsSource, 0);
                 if (oIndex.SubArticles.Count > 0)
                 {
-                    ArticleList.Add(oIndex);
+                    IndexList.Add(oIndex);
                 }
             }
 
-            foreach (Article oArticle in ArticleList)
+            // Save them all to intermidiate output folder
+            foreach (Article oArticle in IndexList)
             {
                 RecursiveSave(oArticle);
             }
 
+            // Generate UID for e-pub
             string uid = Guid.NewGuid().ToString();
 
-            #region toc.ncx
+            #region Generate toc.ncx (Table of Content)
             string sNavMap = "";
-            int nLevel = 0;
+            int nIndentLevel = 0;
             int nPlayOrder = 0;
 
-            foreach (Article oArticle in ArticleList)
+            foreach (Article oArticle in IndexList)
             {
-                sNavMap += NavMap(oArticle, nLevel, nPlayOrder);
+                sNavMap += NavMap(oArticle, nIndentLevel, nPlayOrder);
             }
 
             string sNavHead = "";
@@ -90,12 +107,17 @@ namespace com.charlie.ebook
             sNavHead += "\t\t<text>" + Title + "</text>\r\n";
             sNavHead += "\t</docTitle>\r\n";
             sNavHead += "\t<navMap>\r\n";
-
+            sNavHead += "\t\t<navPoint id=\"coverpage\">\r\n";
+            sNavHead += "\t\t\t<navLabel>\r\n";
+            sNavHead += "\t\t\t\t<text>封面</text>\r\n";
+            sNavHead += "\t\t\t</navLabel>\r\n";
+            sNavHead += "\t\t\t<content src=\"text/coverpage.xhtml\" />\r\n";
+            sNavHead += "\t\t</navPoint>\r\n";
             sNavMap = sNavHead + sNavMap + "\t<navMap>\r\n</ncx>\r\n";
             System.IO.File.WriteAllText(_AppDir + "output\\OEBPS\\toc.ncx", sNavMap);
             #endregion
 
-            #region content.opf
+            #region content.opf (File paths for e-pub index)
             string sContentOpf = "";
 
             // header
@@ -117,7 +139,7 @@ namespace com.charlie.ebook
             sManifest += "\t\t<item href=\"styles/stylesheet.css\" id=\"main-css\" media-type=\"text/css\"/>\r\n";
             sManifest += "\t\t<item href=\"images/cover.png\" id=\"cover-image\" media-type=\"image/png\"/>\r\n";
             sManifest += "\t\t<item href=\"text/coverpage.xhtml\" id=\"coverpage.xhtml\" media-type=\"application/xhtml+xml\"/>\r\n";
-            foreach (Article oArticle in ArticleList)
+            foreach (Article oArticle in IndexList)
             {
                 sManifest += Manifest(oArticle);
             }
@@ -126,7 +148,7 @@ namespace com.charlie.ebook
             // spine
             string sSpine = "";
             sSpine += "\t\t<itemref idref=\"coverpage.xhtml\" />\r\n";
-            foreach (Article oArticle in ArticleList)
+            foreach (Article oArticle in IndexList)
             {
                 sSpine += Spine(oArticle);
             }
@@ -136,25 +158,17 @@ namespace com.charlie.ebook
             System.IO.File.WriteAllText(_AppDir + "output\\OEBPS\\content.opf", sContentOpf);
             #endregion
 
-            // Cover Image
+            // Generate cover image
             CreateCoverImage().Save(_AppDir + "\\output\\OEBPS\\images\\cover.png", System.Drawing.Imaging.ImageFormat.Png);
 
-            #region Zip
+            #region Zip (e-pubs are actually zip files)
             string sEPub = "Z:\\news\\" + Title + ".epub";
             if (System.IO.File.Exists(sEPub))
                 System.IO.File.Delete(sEPub);
             ZipFile.CreateFromDirectory(_AppDir + "output", sEPub);
             #endregion
-
-
         }
 
-        public void Test()
-        {
-            _ImageList.Clear();
-            SelectImages();
-            CreateCoverImage().Save(_AppDir + "created.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-        }
         
         //private Image CreateImage()
         //{
@@ -276,65 +290,71 @@ namespace com.charlie.ebook
         #region Helper functions
 
         #region eBook Helpers
-        private string NavMap(Article _Article, int _Level, int _PlayOrder)
+        /// <summary>
+        /// Generates NavMap section of toc.ncx (Table of Content)
+        /// Recursive call
+        /// </summary>
+        /// <param name="_Article">Article</param>
+        /// <param name="_Indent">Indent level</param>
+        /// <param name="_PlayOrder">Play order, seems useless</param>
+        /// <returns></returns>
+        private string NavMap(Article _Article, int _Indent, int _PlayOrder)
         {
             string sNavMap = "";
-            string sIndent = repeat("\t", _Level + 2);
+            string sIndent = repeat("\t", _Indent + 2);
             sNavMap += sIndent + "<navPoint id=\"" + _Article.ArticleId + "\" playOrder=\"" + _PlayOrder.ToString() + "\" >\r\n";
             sNavMap += sIndent + "\t<navLabel>\r\n";
-            sNavMap += sIndent + "\t\t<text>" + _Article.Title + (_Level ==0? " (" + _Article.SubArticles.Count.ToString() + ")":"") +  "</text>\r\n";
+            sNavMap += sIndent + "\t\t<text>" + _Article.Title + (_Indent == 0 ? " (" + _Article.SubArticles.Count.ToString() + ")" : "") + "</text>\r\n";
             sNavMap += sIndent + "\t</navLabel>\r\n";
             sNavMap += sIndent + "\t<content src=\"text/" + _Article.Filename + "\" />\r\n";
+
+            // Recursive call for all sub-articles
             foreach (Article oSubArticle in _Article.SubArticles)
-            {
-                sNavMap += NavMap(oSubArticle, _Level + 1, ++_PlayOrder);
-            }
+                sNavMap += NavMap(oSubArticle, _Indent + 1, ++_PlayOrder);
+            // Close navPoint tag
             sNavMap += sIndent + "</navPoint>\r\n";
             return sNavMap;
         }
 
+
+        /// <summary>
+        /// Generates itemref section of content.opf
+        /// Recursive call
+        /// </summary>
+        /// <param name="_Article">Article</param>
+        /// <returns></returns>
         private string Spine(Article _Article)
         {
             string sSpine = "";
             sSpine += "\t\t<itemref idref=\"" + _Article.ArticleId + "\" />\r\n";
             foreach (Article oSubArticle in _Article.SubArticles)
-            {
                 sSpine += Spine(oSubArticle);
-            }
             return sSpine;
         }
 
+        /// <summary>
+        /// Generates file index for manifest section of content.opf
+        /// </summary>
+        /// <param name="_Article">Article</param>
+        /// <returns></returns>
         private string Manifest(Article _Article)
         {
             string sManifest = "";
             sManifest += "\t\t<item id=\"" + _Article.ArticleId + "\" href=\"text/" + _Article.Filename + "\" media-type=\"application/xhtml+xml\" />\r\n";
             foreach (Article oSubArticle in _Article.SubArticles)
-            {
                 sManifest += Manifest(oSubArticle);
-            }
             return sManifest;
         }
         #endregion
 
         #region Image manipulations
 
-        private Image PrintCoverDate()
-        {
-            Bitmap bmp = new Bitmap(_AppDir + "empty\\OEBPS\\images\\cover.jpg");
-            using (Graphics g = Graphics.FromImage(bmp))
-            {
-                int nFont = 56;
-                Font oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
-                Brush oBrush = new SolidBrush(ColorTranslator.FromHtml("#222222"));
-                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
-                g.DrawString(System.DateTime.Now.ToString("MMM.dd"), oTitleFont, oBrush, 405, 640);
-                nFont = 50;
-                oTitleFont = new Font("Calibri", nFont, FontStyle.Regular, GraphicsUnit.Pixel);
-                g.DrawString(System.DateTime.Now.ToString("yyyy"), oTitleFont, oBrush, 470, 700);
-            }
-            return bmp;
-        }
-
+        /// <summary>
+        /// Generates 800x600 cover image using a template image
+        /// randomly select 3 images downloaded from all articles
+        /// prints date
+        /// </summary>
+        /// <returns></returns>
         private Image CreateCoverImage()
         {
             SelectImages();
@@ -416,6 +436,14 @@ namespace com.charlie.ebook
             return bmp;
         }
 
+        /// <summary>
+        /// Loads image file, shrink and enlarge to best fit width or height
+        /// then random offset crop to input dimensions
+        /// </summary>
+        /// <param name="_Filename">Image file path</param>
+        /// <param name="_Width">Width of output image</param>
+        /// <param name="_Height">Height of output image</param>
+        /// <returns></returns>
         public Image LoadImageCropped(string _Filename, int _Width, int _Height)
         {
             using (var oFile = new FileStream(_Filename, FileMode.Open))
@@ -423,13 +451,14 @@ namespace com.charlie.ebook
                 var oImageFromFile = new Bitmap(oFile);
                 Image oResult;
 
-                // zoom (width)
+                // zoom-in (width)
                 if (oImageFromFile.Width < _Width)
                 {
                     float nFactor = _Width / oImageFromFile.Width;
                     Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
                     oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
                 }
+                // shrink if wider
                 else
                 {
                     float nFactor = (float)(_Width + 200) / oImageFromFile.Width;
@@ -437,13 +466,14 @@ namespace com.charlie.ebook
                     oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
                 }
 
-                // zoom (height)
+                // zoom-in (height)
                 if (oImageFromFile.Height < _Height)
                 {
                     float nFactor = (float)_Height / oImageFromFile.Height;
                     Size nNewSize = new Size((int)(oImageFromFile.Width * nFactor), (int)(oImageFromFile.Height * nFactor));
                     oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
                 }
+                // shrink if taller
                 else
                 {
                     float nFactor = (float)(_Height + 300) / oImageFromFile.Height;
@@ -451,6 +481,7 @@ namespace com.charlie.ebook
                     oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
                 }
 
+                // Finally make sure width is enough after the adjustment above
                 if (oImageFromFile.Width < _Width)
                 {
                     float nFactor = (float)_Width / oImageFromFile.Width;
@@ -458,6 +489,7 @@ namespace com.charlie.ebook
                     oImageFromFile = new Bitmap(oImageFromFile, nNewSize);
                 }
 
+                // Also make sure height is enough after the adjustment above
                 if (oImageFromFile.Height < _Height)
                 {
                     float nFactor = (float)_Height / oImageFromFile.Height;

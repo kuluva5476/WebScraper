@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v5.0": {
-      "WebScraper/1.0.0": {
+      "WebScraper/1.3.4": {
         "dependencies": {
           "HtmlAgilityPack": "1.11.42",
           "Selenium.WebDriver": "3.141.0",
@@ -880,7 +880,7 @@
     }
   },
   "libraries": {
-    "WebScraper/1.0.0": {
+    "WebScraper/1.3.4": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

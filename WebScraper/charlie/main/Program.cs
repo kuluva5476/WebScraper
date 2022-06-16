@@ -1,5 +1,6 @@
 ﻿using System;
 using com.charlie.ebook;
+using com.charlie.ebook.web.article;
 
 namespace com.charlie.main
 {
@@ -19,12 +20,16 @@ namespace com.charlie.main
         static void Main(string[] args)
         {
             ePubBuilder oEpub = new ePubBuilder();
-            //oEpub.Test();
             oEpub.Generate();
 
-            #region Single Article Tests
+            #region Hard coded tests, to generate single article file
+
+            string sNewsSource = "";
+            Article oArticle;
+            string sUrl = "";
+
             //sNewsSource = "am730";
-            //sUrl = "https://www.am730.com.hk/%E6%9C%AC%E5%9C%B0/%E7%96%AB%E6%83%85%E7%A9%A9%E5%AE%9A-%E9%98%B2%E8%AD%B7%E4%B8%AD%E5%BF%83%E7%BA%8C%E6%9F%A5%E7%A7%81%E6%88%BF%E8%8F%9C%E7%BE%A4%E7%B5%84-%E7%B1%B2%E5%B8%82%E6%B0%91%E6%94%BE%E5%BF%83%E6%AF%8B%E9%A0%88%E6%80%A5%E8%81%9A%E9%A4%90/320084";
+            //sUrl = "https://www.am730.com.hk/%E8%B2%A1%E7%B6%93/%E7%BE%8E%E5%9C%8B%E6%95%B8%E6%93%9A-%E7%BE%8E5%E6%9C%88%E9%9B%B6%E5%94%AE%E6%84%8F%E5%A4%96%E8%B7%8C0.3-%E6%B1%BD%E8%BB%8A%E9%8A%B7%E5%94%AE%E6%B8%9B%E6%8B%96%E7%B4%AF/324175";
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
 
@@ -43,8 +48,19 @@ namespace com.charlie.main
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
 
+            //sNewsSource = "udn-game";
+            //sUrl = "https://game.udn.com/game/story/122089/6392022";
+            //oArticle = new Article(sUrl, sNewsSource, 100);
+            //oArticle.Save();
+
             //sNewsSource = "toy-people";
-            //sUrl = "https://www.toy-people.com/?p=71484";
+            //sUrl = "https://www.toy-people.com/?p=72253";
+            //oArticle = new Article(sUrl, sNewsSource, 100);
+            //oArticle.Save();
+
+            //sNewsSource = "techbang";
+            //sUrl = "https://www.techbang.com/posts/97141-the-strongest-bald-head-in-history-one-punch-man-will-be?from=home_news";
+            ////sUrl = "https://www.techbang.com/posts/97193-acer-built-the-predator-esports-pop-up-store";
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
             #endregion
