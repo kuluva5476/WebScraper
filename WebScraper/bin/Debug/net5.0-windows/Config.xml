@@ -114,5 +114,25 @@
         <filter value="only_mobile" />
       </article>
     </map>
+    <map name="weekendhk-go" caption="新假期好去處">
+      <index url="https://www.weekendhk.com/category/%e9%a6%99%e6%b8%af%e5%a5%bd%e5%8e%bb%e8%99%95/" list_xpath="//div[@class='article--grid__header']/a" item_xpath="">
+      </index>
+      <article last_visit="">
+        <title xpath="//h1[@class='article__title  article__title--single']" />
+        <author xpath="//div[@class='article__author-name']/a" />
+        <publish_date xpath="//time[@class='article__time']" />
+        <modified_date xpath="" />
+        <summary xpath="" />
+        <content xpath="//div[@class='_content_ AdAsia']" image_source="figure --&gt; .//a --&gt; href --&gt; href" image_desc=".//figcaption/text()" />
+        <top_image xpath="" image_source="" image_desc="" />
+        <filter value="gpt_ads_box" />
+		<filter value="in-article-text-ad-container" />
+		<filter value="ad_anyclip_lrec" />
+		<filter value="text-align: center; padding-bottom: 10px; font-size: 11px!important; color: #505050;" />
+		<filter value="question" />
+		<filter value="answer" />
+		<filter value="http:// Linkhk.com" />
+      </article>
+    </map>
   </mappings>
 </configurations>

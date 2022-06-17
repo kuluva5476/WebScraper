@@ -63,6 +63,12 @@ namespace com.charlie.main
             ////sUrl = "https://www.techbang.com/posts/97193-acer-built-the-predator-esports-pop-up-store";
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
+
+            //sNewsSource = "weekendhk-go";
+            //sUrl = "https://www.weekendhk.com/%e9%a6%99%e6%b8%af%e5%a5%bd%e5%8e%bb%e8%99%95/%e6%a8%82%e5%af%8c%e5%bb%a3%e5%a0%b4-%e5%b8%82%e9%9b%86-%e9%9c%b2%e7%87%9f-%e5%92%96%e5%95%a1-js02-1329832/3/";
+            //oArticle = new Article(sUrl, sNewsSource, 100);
+            //oArticle.Save();
+
             #endregion
         }
     }

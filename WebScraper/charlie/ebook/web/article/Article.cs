@@ -168,10 +168,13 @@ namespace com.charlie.ebook.web.article
                                     sImageUrl = xImageNode.Attributes[sImageAttribute]?.Value;
                                     if (sImageUrl == null)
                                         sImageUrl = xImageNode.Attributes[sAltImageAttribute]?.Value;
-                                    string sDescXPath = sImageDescSource[1];
+                                    string sDescXPath = sImageDescSource.Length == 2 ? sImageDescSource[1] : "";
                                     string sImageDesc = "";
+
+
                                     if (xImageDescNodes[i] != null)
-                                        sImageDesc = xImageDescNodes[i].Attributes[sDescXPath]?.Value;
+                                        sImageDesc = sImageDescSource.Length == 2 ? xImageDescNodes[i].Attributes[sDescXPath].Value : xImageDescNodes[i].InnerHtml;
+                                    //sImageDesc = xImageDescNodes[i].Attributes[sDescXPath]?.Value;
 
                                     string sDownloadedName = ArticleId + "_" + _ImageIndex.ToString("000");
                                     string sReturnedFileName = DownloadImage(sImageUrl, sDownloadedName);
@@ -215,7 +218,7 @@ namespace com.charlie.ebook.web.article
                         // if p tags wrap the child nodes around
                         else if (_RootNode.Name.ToLower() == "p")
                             foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
-                                sReturn = "<p>" + RecursiveParse(oChildNode) + "</p>\r\n";
+                                sReturn += "<p>" + RecursiveParse(oChildNode) + "</p>\r\n";
                         // others just send child nodes to parse
                         else
                             foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
@@ -236,11 +239,6 @@ namespace com.charlie.ebook.web.article
             }
             return sReturn;
         }
-
-        //public void LoadHtml()
-        //{
-        //    _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
-        //}
 
         /// <summary>
         /// Call chromium, navigate to the url and wait until loaded, or until time-out
@@ -422,6 +420,7 @@ namespace com.charlie.ebook.web.article
         {
             //LoadHtml();
             _Html.LoadHtml(LoadHtmlAsync(ArticleUrl).Result);
+            //_Html.Save("loaded.html");
             Content = "";
             Title = "";
             try
