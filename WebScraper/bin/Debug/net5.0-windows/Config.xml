@@ -31,7 +31,7 @@
       <index url="https://www.cna.com.tw/list/aall.aspx" list_xpath="//ul[@id='jsMainList']/li" item_xpath=".//a">
         <filter value="早安世界" />
       </index>
-      <article last_visit="https://www.cna.com.tw/news/aipl/202206160048.aspx">
+      <article last_visit="https://www.cna.com.tw/news/afe/202206170014.aspx">
         <title xpath="//div[@class='centralContent']/h1/span" />
         <author xpath="" />
         <publish_date xpath="//*[@class='updatetime']" />
@@ -46,7 +46,7 @@
     <map name="rthk" caption="香港電台">
       <index url="https://news.rthk.hk/rthk/ch/latest-news.htm" list_xpath="//div[@class='ns2-page']" item_xpath=".//a">
       </index>
-      <article last_visit="https://news.rthk.hk/rthk/ch/component/k2/1653269-20220616.htm?spTabChangeable=0">
+      <article last_visit="https://news.rthk.hk/rthk/ch/component/k2/1653387-20220617.htm?spTabChangeable=0">
         <title xpath="//div[@class='items_content']/div[@class='itemHeader']/h2" />
         <author xpath="" />
         <publish_date xpath="//div[@class='items_content']/div[@class='createddate']" />
@@ -61,7 +61,7 @@
         <filter value="/市場資訊/" />
         <filter value="健康快訊" />
       </index>
-      <article last_visit="https://www.am730.com.hk/%E6%9C%AC%E5%9C%B0/7%E6%AC%BE%E6%96%B9%E5%8C%85%E9%88%89%E5%90%AB%E9%87%8F%E9%AB%98-%E4%B8%80%E6%AC%BE%E9%A3%9F2%E7%89%87%E9%81%94%E6%97%A5%E6%94%9D%E5%8F%96%E4%B8%8A%E9%99%90%E9%80%BE%E5%85%A9%E6%88%90/324234">
+      <article last_visit="https://www.am730.com.hk/%E6%9C%AC%E5%9C%B0/%E9%A6%99%E6%B8%AF%E6%95%85%E5%AE%AE%E5%94%AE%E8%BF%91%E5%9B%9B%E6%88%90%E9%96%80%E7%A5%A8-%E9%A6%AE%E7%A8%8B%E6%B7%91%E5%84%80-%E5%B0%87%E8%A3%BD%E6%96%87%E5%89%B5%E7%94%A2%E5%93%81-%E7%AF%80%E7%9B%AE%E5%86%A0%E5%90%8D/324443">
         <title xpath="//h1[@class='article__head-title']" />
         <author xpath="" />
         <publish_date xpath="//div[@class='article__head-time']" />
@@ -75,7 +75,7 @@
     <map name="techbang" caption="T客邦">
       <index url="https://feeds.feedburner.com/techbang/daily" list_xpath="//h4[@class='itemtitle']" item_xpath=".//a">
       </index>
-      <article last_visit="https://www.techbang.com/posts/96004-an-electric-bus-battery-caught-fire-in-paris-france-and-the">
+      <article last_visit="https://www.techbang.com/posts/97218-watch-out-for-bugs-in-the-airpod">
         <title xpath="//h1[@class='post-title']" />
         <author xpath="//a[@class='nickname']" />
         <publish_date xpath="//p[@class='post-meta-info']/span[3]" />
@@ -89,7 +89,7 @@
     </map>
     <map name="toy-people" caption="玩具人">
       <index url="https://www.toy-people.com/denden" list_xpath="//div[@class='news_list']/div" item_xpath=".//div[2]/h2/a" />
-      <article last_visit="https://www.toy-people.com/?p=72253">
+      <article last_visit="https://www.toy-people.com/?p=72298">
         <title xpath=".//div[@class='title']/h1" />
         <author xpath="//*[@id='left-content']/div[1]/div[1]/a/text()" />
         <publish_date xpath="//*[@id='left-content']/div[1]/div[2]/ul/li/time" />
@@ -103,7 +103,7 @@
     <map name="udn-game" caption="遊戲角落">
       <index url="https://game.udn.com/rank/newest/2003" list_xpath=".//div[@id='list']/a" item_xpath="">
       </index>
-      <article last_visit="https://game.udn.com/game/story/122089/6392022">
+      <article last_visit="https://game.udn.com/game/story/122089/6393569">
         <title xpath=".//h1" />
         <author xpath="//span[@class='article-content__author']" />
         <publish_date xpath="//time[@class='article-content__time']" />
