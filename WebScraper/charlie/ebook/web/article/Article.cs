@@ -217,8 +217,12 @@ namespace com.charlie.ebook.web.article
                         }
                         // if p tags wrap the child nodes around
                         else if (_RootNode.Name.ToLower() == "p")
+                        {
+                            sReturn += "<p>";
                             foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
-                                sReturn += "<p>" + RecursiveParse(oChildNode) + "</p>\r\n";
+                                sReturn += RecursiveParse(oChildNode);
+                            sReturn += "</p>\r\n";
+                        }
                         // others just send child nodes to parse
                         else
                             foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
