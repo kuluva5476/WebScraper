@@ -417,9 +417,9 @@ namespace com.charlie.ebook.web.article
 
             if (sExtension.ToLower() == ".svg")
                 return "";
-
+            string sDateTime = System.DateTime.Now.ToString("yyyyMMdd");
             string sReturnFileName = "";
-            string sDownloadedName = ArticleId + "_" + _ImageIndex + sExtension;
+            string sDownloadedName = ArticleId + "_" + sDateTime +  "_" + _ImageIndex + sExtension;
             try
             {
                 oDownloader.DownloadFile(_Url, _AppDir + "output\\OEBPS\\images\\" + sDownloadedName);

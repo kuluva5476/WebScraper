@@ -1,6 +1,9 @@
 # WebScraper
 解析新聞網站內容, 製作成 ePub格式電子書
 
+Version 1.3.8
+- Add datetime to image filename
+
 Version 1.3.7
 - Add support to &lt;ul&gt; &lt;li&gt;
 

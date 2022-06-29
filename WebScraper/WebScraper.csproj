@@ -10,10 +10,13 @@
     <SignAssembly>false</SignAssembly>
     <Authors>kuluva5476</Authors>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <FileVersion>1.3.7.0</FileVersion>
-    <AssemblyVersion>1.3.7.0</AssemblyVersion>
+    <FileVersion>1.3.8.0</FileVersion>
+    <AssemblyVersion>1.3.8.0</AssemblyVersion>
     <Version>1.3.6</Version>
-    <PackageReleaseNotes>Version 1.3.7
+    <PackageReleaseNotes>Version 1.3.8
+- Add datetime to Image filename
+
+Version 1.3.7
 - Preserver tags (table, tr, td, ul, li, others)
 
 Version 1.3.6
