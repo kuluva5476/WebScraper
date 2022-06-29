@@ -13,11 +13,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("kuluva5476")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.3.6.0")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("1.3.7.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.3.6")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebScraper")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebScraper")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.3.6.0")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.3.7.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

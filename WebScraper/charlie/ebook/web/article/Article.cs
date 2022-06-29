@@ -203,18 +203,28 @@ namespace com.charlie.ebook.web.article
                         // assuming these are end nodes
                         if (_RootNode.Name.ToLower() == "h2" || _RootNode.Name.ToLower() == "h3")
                         {
-                            sReturn += "<p>";
+                            sReturn += "<p><b>";
                             foreach (HtmlNode oInnerNode in _RootNode.ChildNodes)
                             {
                                 if (oInnerNode.Name == "a")
-                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
+                                    sReturn += "<u>" + oInnerNode.InnerText + "</u>";
                                 else if (oInnerNode.Name == "#text")
                                     sReturn += oInnerNode.InnerText;
                                 else
-                                    sReturn += "<b>" + oInnerNode.InnerText + "</b>";
+                                    sReturn += oInnerNode.InnerText;
                             }
-                            sReturn += "</p>\r\n";
+                            sReturn += "</b></p>\r\n";
                         }
+                        //else
+                        //{
+                        //    //sReturn += (_RootNode.Name.ToLower() == "p") ? "<p>" : "";
+                        //    foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
+                        //    {
+                        //        sReturn += "<" + _RootNode.Name.ToLower() + ">" +RecursiveParse(oChildNode) + "</" + _RootNode.Name.ToLower() + ">";
+                        //    }
+                        //    sReturn += (_RootNode.Name.ToLower() == "p") ? "\r\n" : "";
+                        //}
+
                         // if p tags wrap the child nodes around
                         else if (_RootNode.Name.ToLower() == "p")
                         {
@@ -223,9 +233,15 @@ namespace com.charlie.ebook.web.article
                                 sReturn += RecursiveParse(oChildNode);
                             sReturn += "</p>\r\n";
                         }
+                        else if (_RootNode.Name.ToLower() == "ul" || _RootNode.Name.ToLower() == "li")
+                            foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
+                            {
+                                sReturn += "<" + _RootNode.Name.ToLower() + ">" + RecursiveParse(oChildNode) + "</" + _RootNode.Name.ToLower() + ">\r\n";
+                            }
+
                         // others just send child nodes to parse
                         else
-                            foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
+                                    foreach (HtmlNode oChildNode in _RootNode.ChildNodes)
                                 sReturn += RecursiveParse(oChildNode);
                     }
                     // No childs, just get the text

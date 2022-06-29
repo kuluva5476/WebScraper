@@ -32,7 +32,7 @@
       <index url="https://www.cna.com.tw/list/aall.aspx" list_xpath="//ul[@id='jsMainList']/li" item_xpath=".//a">
         <filter value="早安世界" />
       </index>
-      <article last_visit="https://www.cna.com.tw/news/aopl/202206200010.aspx">
+      <article last_visit="https://www.cna.com.tw/news/aopl/202206290017.aspx">
         <title xpath="//div[@class='centralContent']/h1/span" />
         <author xpath="" />
         <publish_date xpath="//*[@class='updatetime']" />
@@ -47,7 +47,7 @@
     <map name="rthk" caption="香港電台">
       <index url="https://news.rthk.hk/rthk/ch/latest-news.htm" list_xpath="//div[@class='ns2-page']" item_xpath=".//a">
       </index>
-      <article last_visit="https://news.rthk.hk/rthk/ch/component/k2/1653771-20220620.htm?spTabChangeable=0">
+      <article last_visit="https://news.rthk.hk/rthk/ch/component/k2/1655193-20220629.htm?spTabChangeable=0">
         <title xpath="//div[@class='items_content']/div[@class='itemHeader']/h2" />
         <author xpath="" />
         <publish_date xpath="//div[@class='items_content']/div[@class='createddate']" />
@@ -62,7 +62,7 @@
         <filter value="/市場資訊/" />
         <filter value="健康快訊" />
       </index>
-      <article last_visit="https://www.am730.com.hk/%E5%81%A5%E5%BA%B7/-%E5%81%A5%E5%BA%B7%E8%A7%A3%E7%A2%BC-%E5%B0%8F%E5%BF%83%E9%A1%9E%E9%A2%A8%E6%BF%95%E6%80%A7%E9%97%9C%E7%AF%80%E7%82%8E-%E9%9D%92%E5%A3%AF%E4%BA%BA%E5%A3%AB%E5%91%A8%E8%BA%AB%E9%AA%A8%E7%97%9B-%E5%8F%8A%E6%97%A9%E8%A8%BA%E6%B2%BB%E8%AD%B7%E9%97%9C%E7%AF%80/324281">
+      <article last_visit="https://www.am730.com.hk/%E6%9C%AC%E5%9C%B0/%E6%85%B6%E5%9B%9E%E6%AD%B8-%E7%81%A3%E4%BB%94%E9%AB%98%E9%98%B2-%E5%B0%81%E6%9C%83%E5%B1%95%E7%AB%99-%E5%85%A8%E6%B8%AF%E7%A6%81%E9%A3%9B-%E8%AD%A6%E6%96%B9%E7%82%BA%E7%BF%92%E8%BF%91%E5%B9%B3%E4%BD%9C%E8%BF%91%E8%BA%AB%E4%BF%9D%E8%A1%9B/326233">
         <title xpath="//h1[@class='article__head-title']" />
         <author xpath="" />
         <publish_date xpath="//div[@class='article__head-time']" />
@@ -71,12 +71,13 @@
         <content xpath="//div[@class='article__body']" image_source="figure --&gt; .//a[@class='picsolo-pic'] --&gt; href --&gt; href" image_desc=".//a[@class='picsolo-pic'] --&gt; data-caption" />
         <top_image xpath="" image_source="" image_desc="" />
         <filter value="ATS_mid" />
+        <filter value="newsflash" />
       </article>
     </map>
     <map name="techbang" caption="T客邦">
       <index url="https://feeds.feedburner.com/techbang/daily" list_xpath="//h4[@class='itemtitle']" item_xpath=".//a">
       </index>
-      <article last_visit="https://www.techbang.com/posts/97046-netapp-helps-accelerate-vmware-workload-transitions-to-the">
+      <article last_visit="https://www.techbang.com/posts/97298-jr-east-co-working-space-one-co-taipei-starts-to-visit-by">
         <title xpath="//h1[@class='post-title']" />
         <author xpath="//a[@class='nickname']" />
         <publish_date xpath="//p[@class='post-meta-info']/span[3]" />
@@ -86,11 +87,15 @@
         <top_image xpath="" image_source="" image_desc="" />
         <filter value="newsletter-subscribe" />
         <filter value="header-sharing" />
+        <filter value="phone-ads ads-bg" />
+        <filter value="ad_unit" />
+        <filter value="google_ads_iframe" />
+        <filter value="asoch-exit-api" />
       </article>
     </map>
     <map name="toy-people" caption="玩具人">
       <index url="https://www.toy-people.com/denden" list_xpath="//div[@class='news_list']/div" item_xpath=".//div[2]/h2/a" />
-      <article last_visit="https://www.toy-people.com/?p=72346">
+      <article last_visit="https://www.toy-people.com/?p=72598">
         <title xpath=".//div[@class='title']/h1" />
         <author xpath="//*[@id='left-content']/div[1]/div[1]/a/text()" />
         <publish_date xpath="//*[@id='left-content']/div[1]/div[2]/ul/li/time" />
@@ -99,12 +104,13 @@
         <content xpath="//*[@itemprop='articleBody']" image_source="p --&gt; .//img --&gt; origin --&gt; src" image_desc=".//img --&gt; alt" />
         <top_image xpath="" image_source="" image_desc="" />
         <filter value="article_insertAD" />
+        <filter value="right share" />
       </article>
     </map>
     <map name="udn-game" caption="遊戲角落">
       <index url="https://game.udn.com/rank/newest/2003" list_xpath=".//div[@id='list']/a" item_xpath="">
       </index>
-      <article last_visit="https://game.udn.com/game/story/122089/6399017">
+      <article last_visit="https://game.udn.com/game/story/122089/6422619">
         <title xpath=".//h1" />
         <author xpath="//span[@class='article-content__author']" />
         <publish_date xpath="//time[@class='article-content__time']" />
@@ -113,12 +119,14 @@
         <content xpath="//section[@class='article-content__editor']" image_source="figure --&gt; .//img[@class='lazyloaded'] --&gt; src --&gt; src" image_desc=".//img[@class='lazyloaded'] --&gt; alt" />
         <top_image xpath="" image_source="" image_desc="" />
         <filter value="only_mobile" />
+        <filter value="area extend" />
+        <filter value="tags" />
       </article>
     </map>
     <map name="weekendhk-go" caption="新假期">
       <index url="https://www.weekendhk.com/category/%e9%a6%99%e6%b8%af%e5%a5%bd%e5%8e%bb%e8%99%95/" list_xpath="//div[@class='article--grid__header']/a" item_xpath="">
       </index>
-      <article last_visit="https://www.weekendhk.com/%E9%A6%99%E6%B8%AF%E5%A5%BD%E5%8E%BB%E8%99%95/%E6%8F%90%E5%AD%90%E5%9C%92-%E5%85%83%E6%9C%97-%E8%91%A1%E8%90%84%E5%9C%92-%E6%9E%9C%E5%9C%92-js07-1330438/">
+      <article last_visit="https://www.weekendhk.com/%E9%A6%99%E6%B8%AF%E5%A5%BD%E5%8E%BB%E8%99%95/%E6%9D%B1%E6%B8%AF%E5%9F%8E-%E5%B0%87%E8%BB%8D%E6%BE%B3-%E7%94%9C%E5%93%81%E5%B1%95-js02-1333778/">
         <title xpath="//h1[@class='article__title  article__title--single']" />
         <author xpath="//div[@class='article__author-name']/a" />
         <publish_date xpath="//time[@class='article__time']" />

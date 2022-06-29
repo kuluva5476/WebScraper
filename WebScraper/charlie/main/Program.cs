@@ -29,7 +29,7 @@ namespace com.charlie.main
             string sUrl = "";
 
             //sNewsSource = "am730";
-            //sUrl = "https://www.am730.com.hk/%E8%B2%A1%E7%B6%93/%E7%BE%8E%E5%9C%8B%E6%95%B8%E6%93%9A-%E7%BE%8E5%E6%9C%88%E9%9B%B6%E5%94%AE%E6%84%8F%E5%A4%96%E8%B7%8C0.3-%E6%B1%BD%E8%BB%8A%E9%8A%B7%E5%94%AE%E6%B8%9B%E6%8B%96%E7%B4%AF/324175";
+            //sUrl = "https://www.am730.com.hk/%E6%9C%AC%E5%9C%B0/%E5%BC%B7%E5%88%B6%E6%AA%A2%E6%B8%AC-26%E5%9C%B0%E9%BB%9E%E4%B8%8A%E6%A6%9C-%E6%B6%89%E9%8A%85%E9%91%BC%E7%81%A3%E6%97%BA%E8%A7%92%E4%B8%AD%E7%92%B0%E9%A3%9F%E8%82%86-%E9%99%84%E5%90%8D%E5%96%AE-/325801";
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
 
@@ -59,8 +59,8 @@ namespace com.charlie.main
             //oArticle.Save();
 
             //sNewsSource = "techbang";
-            //sUrl = "https://www.techbang.com/posts/97141-the-strongest-bald-head-in-history-one-punch-man-will-be?from=home_news";
-            ////sUrl = "https://www.techbang.com/posts/97193-acer-built-the-predator-esports-pop-up-store";
+            //sUrl = "https://www.techbang.com/posts/97278-abandon-the-x86-russian-atm-machine-next-year-with-the-elbrus?from=home_news";
+            //////sUrl = "https://www.techbang.com/posts/97193-acer-built-the-predator-esports-pop-up-store";
             //oArticle = new Article(sUrl, sNewsSource, 100);
             //oArticle.Save();
 
